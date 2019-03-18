@@ -1,32 +1,17 @@
-lazy val I = new {
-  val organization = "com.github.niqdev"
-  val name = "mobile-carrier-bot"
-  val version = "0.1"
-}
-
-lazy val G = new {
-  val scalaScraper = "net.ruippeixotog"
-}
-
-lazy val V = new {
-  val scala = "2.12.8"
-
-  val scalaScraper = "2.1.0"
-}
+import Dependencies.libDependencies
 
 lazy val lib = (project in file("lib"))
   .settings(
-    libraryDependencies ++= Seq(
-      G.scalaScraper %% "scala-scraper" % V.scalaScraper
-    )
+    libraryDependencies ++= libDependencies
+      .map(_.withSources).map(_.withJavadoc)
   )
 
 lazy val root = project.in(file("."))
   .settings(
     inThisBuild(List(
-      organization := I.organization,
-      scalaVersion := V.scala,
-      version := I.version,
+      organization := "com.github.niqdev",
+      scalaVersion := "2.12.8",
+      version := "0.1",
     )),
-    name := I.name
+    name := "mobile-carrier-bot"
   )
