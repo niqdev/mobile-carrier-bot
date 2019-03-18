@@ -1,1 +1,13 @@
-http https://sso.three.ie/mylogin//login?service=https%3A%2F%2Fmy3account.three.ie%2FHome > html/login.html
+login
+* POST https://sso.three.ie/mylogin//login?service=https%3A%2F%2Fmy3account.three.ie%2FHome
+* query parameters:
+  - service
+* payload:
+  - username
+  - password
+  - lt
+* cookie
+  - JSESSIONID
+
+login redirect
+TODO
