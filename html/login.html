@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <title>Welcome to My3.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Script-Type" content="text/javascript; charset=utf-8"/>
+    <meta http-equiv="Content-Style-Type" content="text/css; charset=utf-8"/>
+    <meta name="description" content="My 3 account"/>
+
+    <link rel="stylesheet" media="all" href="https://my3account.three.ie/static/css/three.css"/>
+    <script type="text/javascript" src="https://my3account.three.ie/static/script/my3/my3-lib.js"></script>
+
+    <script type="text/javascript">
+        function validateForm() {
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="threePortlet">
+
+    <div class="my3AuthError" id="allFieldError" style="display:none">error message</div>
+
+    <form name="login_form"
+          method="post"
+          onsubmit="return validateForm();"
+          id="securityCheck"
+          enctype="application/x-www-form-urlencoded">
+
+        <div class="login">
+            <div>
+                <label>Mobile/Broadband Number</label>
+            </div>
+
+            <div>username tooltip</div>
+
+            <input class="login-field login-field-username "
+                   type="text"
+                   placeholder=""
+                   autocapitalize="off"
+                   autocomplete="off"
+                   autocorrect="off"
+                   name="username"
+                   id="username"
+                   tabindex=""
+                   value=""
+                   size="12"
+                   maxlength="12"/>
+
+            <div>
+                <label>Password</label>
+            </div>
+
+            <div>password tooltip</div>
+
+            <input class="login-field login-field-password "
+                   type="password"
+                   placeholder=""
+                   name="password"
+                   id="j_password"
+                   maxlength="30"/>
+
+            <div class="global width-150">
+                <button type="" class="globalButton" title="Next">
+                    <div class="buttonInner14">Log in to My3</div>
+                </button>
+            </div>
+
+            <input type="hidden" name="lt" value="LT-12345678-01234567890123456789"/>
+        </div>
+
+    </form>
+</div>
+</body>
+</html>

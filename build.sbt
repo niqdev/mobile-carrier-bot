@@ -4,12 +4,22 @@ lazy val I = new {
   val version = "0.1"
 }
 
+lazy val G = new {
+  val scalaScraper = "net.ruippeixotog"
+}
+
 lazy val V = new {
   val scala = "2.12.8"
+
+  val scalaScraper = "2.1.0"
 }
 
 lazy val lib = (project in file("lib"))
-  .settings()
+  .settings(
+    libraryDependencies ++= Seq(
+      G.scalaScraper %% "scala-scraper" % V.scalaScraper
+    )
+  )
 
 lazy val root = project.in(file("."))
   .settings(
