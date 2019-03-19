@@ -1,17 +1,16 @@
 package com.github.niqdev
 
 import cats.effect.IO
+import com.github.niqdev.internal.ConsoleOut
 
 object Main extends App {
 
-  val ioa = IO {
-    println("hello")
-  }
+  val hello = ConsoleOut[IO].println("Hello World")
 
   val program: IO[Unit] =
     for {
-      _ <- ioa
-      _ <- ioa
+      _ <- hello
+      _ <- hello
     } yield ()
 
   program.unsafeRunSync()
