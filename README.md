@@ -1,5 +1,5 @@
 # mobile-carrier-bot
 
 ```
-sbt lib/run
+ENVIRONMENT=dev sbt lib/run
 ```
