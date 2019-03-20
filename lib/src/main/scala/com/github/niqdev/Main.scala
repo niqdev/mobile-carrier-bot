@@ -1,21 +1,18 @@
 package com.github.niqdev
 
-import com.github.niqdev.internal.{ConsoleOut, IO}
+import cats.effect.{ExitCode, IO, IOApp, Sync}
+import cats.implicits.{toFlatMapOps, toFunctorOps}
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-object Main extends App {
+object Main extends IOApp {
 
-  //val hello = ConsoleOut[IO].println("Hello World")
-  val hello1 = IO { println("Hello World1") }
-  val hello2 = IO { println("Hello World2") }
-
-  val program: IO[Unit] =
+  private[this] def program[F[_] : Sync]: F[Unit] =
     for {
-      _ <- hello1
-      _ <- hello1
-      _ <- hello2
-      _ <- hello2
+      log <- Slf4jLogger.create[F]
+      _ <- log.info("Hello World")
     } yield ()
 
-  program.run
+  override def run(args: List[String]): IO[ExitCode] =
+    program[IO].as(ExitCode.Success)
 
 }

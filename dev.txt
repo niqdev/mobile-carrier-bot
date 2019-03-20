@@ -11,3 +11,9 @@ login
 
 login redirect
 TODO
+
+---
+
+https://github.com/alvinj/IOMonad/blob/master/src/main/scala/io_monad/IO.scala
+https://devth.com/2015/monad-laws-in-scala
+https://github.com/barambani/laws
