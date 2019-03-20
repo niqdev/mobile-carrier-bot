@@ -22,10 +22,10 @@ object Main extends IOApp {
     } yield ()
 
   private[this] def success[F[_] : Sync](log: Logger[F]): Unit => F[ExitCode] =
-    _ => log.info("Application succeeded") *> Sync[F].delay(ExitCode.Success)
+    _ => log.info("Application succeeded") *> Sync[F].pure(ExitCode.Success)
 
   private[this] def error[F[_] : Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
-    log.error(e)("Application failed") *> Sync[F].delay(ExitCode.Error)
+    log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
 
   override def run(args: List[String]): IO[ExitCode] =
     Slf4jLogger.create[IO].flatMap(log =>
