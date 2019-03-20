@@ -5,15 +5,15 @@ class IO[A] private(a0: => A) {
 
   def run: A = a0
 
-  // TODO monad laws
+  // TODO verify monad laws
   def flatMap[B](f: A => IO[B]): IO[B] =
-    //f(a)
-    IO(f(run).run)
+    f(run)
+    //IO(f(run).run)
 
-  // TODO monad laws
+  // TODO verify monad laws
   def map[B](f: A => B): IO[B] =
-    //IO(f(run))
-    flatMap(a => IO(f(a)))
+    IO(f(run))
+    //flatMap(a => IO(f(a)))
 
 }
 
