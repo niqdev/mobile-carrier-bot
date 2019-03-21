@@ -1,9 +1,9 @@
-import Dependencies.libDependencies
+import Dependencies.{libDependencies, testDependencies}
 
 lazy val lib = (project in file("lib"))
   .settings(
-    libraryDependencies ++= libDependencies
-      .map(_.withSources).map(_.withJavadoc)
+    libraryDependencies ++= testDependencies ++
+      libDependencies.map(_.withSources).map(_.withJavadoc)
   )
 
 lazy val root = project.in(file("."))

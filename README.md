@@ -2,4 +2,6 @@
 
 ```
 ENVIRONMENT=dev sbt lib/run
+
+sbt lib/test
 ```

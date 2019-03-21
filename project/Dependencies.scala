@@ -2,18 +2,6 @@ import sbt._
 
 object Dependencies {
 
-  private[this] lazy val G = new {
-    val typelevel = "org.typelevel"
-    val refined = "eu.timepit"
-
-    val log4cats = "io.chrisdavenport"
-    val logback = "ch.qos.logback"
-
-    val ciris = "is.cir"
-
-    val scalaScraper = "net.ruippeixotog"
-  }
-
   private[this] lazy val V = new {
     val catsCore = "1.6.0"
     val catsEffect = "1.2.0"
@@ -28,18 +16,23 @@ object Dependencies {
   }
 
   lazy val libDependencies = Seq(
-    G.typelevel %% "cats-core" % V.catsCore,
-    G.typelevel %% "cats-effect" % V.catsEffect,
-    G.refined %% "refined" % V.refined,
+    "org.typelevel" %% "cats-core" % V.catsCore,
+    "org.typelevel" %% "cats-effect" % V.catsEffect,
+    "eu.timepit" %% "refined" % V.refined,
 
-    G.log4cats %% "log4cats-slf4j" % V.log4cats,
-    G.logback % "logback-classic" % V.logback,
+    "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
+    "ch.qos.logback" % "logback-classic" % V.logback,
 
-    G.ciris %% "ciris-core" % V.ciris,
-    G.ciris %% "ciris-cats" % V.ciris,
-    G.ciris %% "ciris-refined" % V.ciris,
+    "is.cir" %% "ciris-core" % V.ciris,
+    "is.cir" %% "ciris-cats" % V.ciris,
+    "is.cir" %% "ciris-refined" % V.ciris,
 
-    G.scalaScraper %% "scala-scraper" % V.scalaScraper
+    "net.ruippeixotog" %% "scala-scraper" % V.scalaScraper
+  )
+
+  lazy val testDependencies = Seq(
+    "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+    "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
   )
 
 }
