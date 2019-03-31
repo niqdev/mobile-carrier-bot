@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="PATTERN" value="[%date{ISO8601}][%-5level][%logger{36}] %msg%n"/>
+    <property name="PATTERN"
+              value="[%date{ISO8601}][%highlight(%-5level)][%green(%thread)][%cyan(%logger{36})] %msg%n"/>
     <property name="BASE_PATH" value="log"/>
     <property name="LOG_NAME" value="output"/>
 
