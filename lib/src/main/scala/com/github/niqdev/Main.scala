@@ -8,11 +8,15 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object Main extends IOApp {
 
+  // TODO async?
   private[this] def program[F[_] : Sync](log: Logger[F]): F[Unit] =
     for {
       _ <- log.info("Hello World")
       settings <- Settings.load[F]
+      threeBalance <- Scraper.threeIe("", "")
+      timBalance <- Scraper.timIt("", "")
       _ <- log.info(s"$settings")
+      _ <- log.info(s"Balances: [Three=$threeBalance][Tim=$timBalance]")
     } yield ()
 
   private[this] def error[F[_] : Sync](log: Logger[F])(e: Throwable): F[ExitCode] =

@@ -1,16 +1,16 @@
-/*
 package com.github.niqdev
 
 import java.util.UUID
 
+import cats.effect.Sync
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract.{attr, element, text}
 import net.ruippeixotog.scalascraper.dsl.DSL._
 
-// TODO pure FP
+// TODO pure FP, typeclass, don't wrap only result in delay
 object Scraper {
 
-  private[this] def threeIe(username: String, password: String) = {
+  def threeIe[F[_] : Sync](username: String, password: String): F[String] = {
     val browser: JsoupBrowser = JsoupBrowser.typed()
     val docGet = browser.get("https://sso.three.ie/mylogin//login?service=https%3A%2F%2Fmy3account.three.ie%2FMy_account_balance")
 
@@ -27,10 +27,11 @@ object Scraper {
     val redirectLink = docPost >> attr("href")("a[target=_parent]")
     val redirect = browser.get(redirectLink)
     val balance = redirect >> element("div.P54_myAccountBalance_w1") >> text("td.twenty")
-    println(balance)
+
+    Sync[F].delay(balance)
   }
 
-  private[this] def timIt(username: String, password: String) = {
+  def timIt[F[_] : Sync](username: String, password: String): F[String] = {
     val browser: JsoupBrowser = JsoupBrowser.typed()
 
     val form = Map(
@@ -40,12 +41,13 @@ object Scraper {
       "tokenLogin" -> s"AREA_PUBBLICA_${UUID.randomUUID}"
     )
 
-    val docLogin = browser.post("https://auth.tim.it/dcauth/faces/dcauth/pages/authentication/genericlogin/genericlogin.xhtml", form)
+    //val docLogin =
+    browser.post("https://auth.tim.it/dcauth/faces/dcauth/pages/authentication/genericlogin/genericlogin.xhtml", form)
     //val cookie = browser.cookies("")("DCAUTH_AUTH_COOKIE")
     val docHome = browser.post("https://www.119selfservice.tim.it/area-clienti-119/privata/opzioni", Map())
     val balance = docHome >> element("div.info_user") >> text("p.credito_residuo")
-    println(balance)
+
+    Sync[F].delay(balance)
   }
 
 }
-*/
