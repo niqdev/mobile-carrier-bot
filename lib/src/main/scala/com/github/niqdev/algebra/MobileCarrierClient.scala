@@ -53,7 +53,6 @@ trait MobileCarrierClientInstances {
         "tokenLogin" -> s"AREA_PUBBLICA_${UUID.randomUUID}"
       )
 
-      //val docLogin =
       browser.post("https://auth.tim.it/dcauth/faces/dcauth/pages/authentication/genericlogin/genericlogin.xhtml", form)
       //val cookie = browser.cookies("")("DCAUTH_AUTH_COOKIE")
       val docHome = browser.post("https://www.119selfservice.tim.it/area-clienti-119/privata/opzioni", Map())

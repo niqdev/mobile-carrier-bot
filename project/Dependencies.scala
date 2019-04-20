@@ -12,6 +12,8 @@ object Dependencies {
 
     val ciris = "0.12.1"
 
+    val http4s = "0.20.0-SNAPSHOT"
+
     val scalaScraper = "2.1.0"
   }
 
@@ -26,6 +28,10 @@ object Dependencies {
     "is.cir" %% "ciris-core" % V.ciris,
     "is.cir" %% "ciris-cats" % V.ciris,
     "is.cir" %% "ciris-refined" % V.ciris,
+
+    "org.http4s" %% "http4s-dsl" % V.http4s,
+    "org.http4s" %% "http4s-blaze-server" % V.http4s,
+    "org.http4s" %% "http4s-blaze-client" % V.http4s,
 
     "net.ruippeixotog" %% "scala-scraper" % V.scalaScraper
   )

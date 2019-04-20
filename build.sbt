@@ -2,6 +2,8 @@ import Dependencies.{libDependencies, testDependencies}
 
 lazy val lib = (project in file("lib"))
   .settings(
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+
     libraryDependencies ++= testDependencies ++
       libDependencies.map(_.withSources).map(_.withJavadoc)
   )
