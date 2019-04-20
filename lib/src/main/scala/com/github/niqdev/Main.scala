@@ -2,6 +2,7 @@ package com.github.niqdev
 
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, toFlatMapOps, toFunctorOps}
+import cats.syntax.all._
 import com.github.niqdev.algebra.MobileCarrierClient
 import com.github.niqdev.model.{Settings, Three, Tim}
 import io.chrisdavenport.log4cats.Logger
@@ -9,15 +10,18 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object Main extends IOApp {
 
-  // TODO run in parallel: parSequence
+  def retrieveBalances[F[_] : Sync]: F[String] = (
+    MobileCarrierClient[F, Three].balance("", ""),
+    MobileCarrierClient[F, Tim].balance("", "")
+  ).mapN((threeBalance, timBalance) => s"Balances: [Three=$threeBalance][Tim=$timBalance]")
+
   private[this] def program[F[_] : Sync](log: Logger[F]): F[Unit] =
     for {
       _ <- log.info("Hello World")
       settings <- Settings.load[F]
-      threeBalance <- MobileCarrierClient[F, Three].balance("", "")
-      timBalance <- MobileCarrierClient[F, Tim].balance("", "")
+      balances <- retrieveBalances[F]
       _ <- log.info(s"$settings")
-      _ <- log.info(s"Balances: [Three=$threeBalance][Tim=$timBalance]")
+      _ <- log.info(balances)
     } yield ()
 
   private[this] def error[F[_] : Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
