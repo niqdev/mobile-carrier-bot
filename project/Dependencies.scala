@@ -16,6 +16,11 @@ object Dependencies {
     val http4s = "0.20.0-SNAPSHOT"
 
     val scalaScraper = "2.1.0"
+
+    val scalatest = "3.0.5"
+    val scalacheck = "1.14.0"
+
+    val silencer = "1.3.3"
   }
 
   lazy val libDependencies = Seq(
@@ -39,8 +44,13 @@ object Dependencies {
   )
 
   lazy val testDependencies = Seq(
-    "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-    "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+    "org.scalatest" %% "scalatest" % V.scalatest % Test,
+    "org.scalacheck" %% "scalacheck" % V.scalacheck % Test
+  )
+
+  lazy val compilerPluginDependencies = Seq(
+    compilerPlugin("com.github.ghik" %% "silencer-plugin" % V.silencer),
+    "com.github.ghik" %% "silencer-lib" % V.silencer % Provided
   )
 
 }

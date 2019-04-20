@@ -4,14 +4,13 @@ package algebra
 import java.util.UUID
 
 import cats.effect.Sync
-import com.github.niqdev.model.MobileNetworkOperator
 import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract.{attr, element, text}
 import net.ruippeixotog.scalascraper.dsl.DSL._
 
 // TODO Credentials, Balance, refined
-trait MobileCarrierClient[F[_], MNO <: MobileNetworkOperator] {
+trait MobileCarrierClient[F[_], MNO] {
   def balance(username: String, password: String): F[String]
 }
 

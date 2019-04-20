@@ -1,11 +1,13 @@
-import Dependencies.{libDependencies, testDependencies}
+import Dependencies.{compilerPluginDependencies, libDependencies, testDependencies}
 
 lazy val lib = (project in file("lib"))
   .settings(
     resolvers += Resolver.sonatypeRepo("snapshots"),
 
-    libraryDependencies ++= testDependencies ++
-      libDependencies.map(_.withSources).map(_.withJavadoc)
+    libraryDependencies ++=
+      libDependencies.map(_.withSources).map(_.withJavadoc) ++
+        testDependencies ++
+        compilerPluginDependencies
   )
 
 lazy val root = project.in(file("."))

@@ -1,6 +1,7 @@
 package com.github.niqdev
 package model
 
+import com.github.ghik.silencer.silent
 import enumeratum.EnumEntry.Uppercase
 import enumeratum.{Enum, EnumEntry}
 import eu.timepit.refined.api.Refined
@@ -12,6 +13,7 @@ import eu.timepit.refined.string.Url
   * https://en.wikipedia.org/wiki/List_of_mobile_network_operators
   * https://en.wikipedia.org/wiki/List_of_country_calling_codes
   */
+@silent
 sealed abstract class MobileNetworkOperator(countryCallingCode: Int Refined Positive, website: String Refined Url) extends EnumEntry
 
 object MobileNetworkOperator extends Enum[MobileNetworkOperator] {
