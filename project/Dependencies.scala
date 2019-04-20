@@ -5,7 +5,8 @@ object Dependencies {
   private[this] lazy val V = new {
     val catsCore = "1.6.0"
     val catsEffect = "1.2.0"
-    val refined = "0.9.4"
+    val refined = "0.9.5"
+    val enumeratum = "1.5.13"
 
     val log4cats = "0.3.0"
     val logback = "1.2.3"
@@ -21,6 +22,7 @@ object Dependencies {
     "org.typelevel" %% "cats-core" % V.catsCore,
     "org.typelevel" %% "cats-effect" % V.catsEffect,
     "eu.timepit" %% "refined" % V.refined,
+    "com.beachape" %% "enumeratum" % V.enumeratum,
 
     "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
     "ch.qos.logback" % "logback-classic" % V.logback,

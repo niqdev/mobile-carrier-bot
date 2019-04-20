@@ -3,7 +3,8 @@ package com.github.niqdev
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, catsSyntaxTuple2Semigroupal, toFlatMapOps, toFunctorOps}
 import com.github.niqdev.algebra.MobileCarrierClient
-import com.github.niqdev.model.{Settings, Three, Tim}
+import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
+import com.github.niqdev.model.Settings
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.HttpRoutes
@@ -21,8 +22,8 @@ import org.http4s.server.blaze.BlazeServerBuilder
 object Main extends IOApp {
 
   private[this] def retrieveBalances[F[_] : Sync]: F[String] = (
-    MobileCarrierClient[F, Three].balance("", ""),
-    MobileCarrierClient[F, Tim].balance("", "")
+    MobileCarrierClient[F, ThreeIe].balance("", ""),
+    MobileCarrierClient[F, TimIt].balance("", "")
   ).mapN((threeBalance, timBalance) => s"Balances: [Three=$threeBalance][Tim=$timBalance]")
 
   private[this] def program[F[_] : Sync](log: Logger[F]): F[Unit] =

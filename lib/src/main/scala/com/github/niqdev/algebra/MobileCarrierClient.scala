@@ -4,23 +4,24 @@ package algebra
 import java.util.UUID
 
 import cats.effect.Sync
-import com.github.niqdev.model.{Three, Tim}
+import com.github.niqdev.model.MobileNetworkOperator
+import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract.{attr, element, text}
 import net.ruippeixotog.scalascraper.dsl.DSL._
 
 // TODO Credentials, Balance, refined
-trait MobileCarrierClient[F[_], MC] {
+trait MobileCarrierClient[F[_], MNO <: MobileNetworkOperator] {
   def balance(username: String, password: String): F[String]
 }
 
 object MobileCarrierClient extends MobileCarrierClientInstances {
-  def apply[F[_], MC](implicit C: MobileCarrierClient[F, MC]): MobileCarrierClient[F, MC] = C
+  def apply[F[_], MNO](implicit C: MobileCarrierClient[F, MNO]): MobileCarrierClient[F, MNO] = C
 }
 
 trait MobileCarrierClientInstances {
 
-  implicit def threeMobileCarrierClient[F[_] : Sync]: MobileCarrierClient[F, Three] =
+  implicit def threeMobileCarrierClient[F[_] : Sync]: MobileCarrierClient[F, ThreeIe] =
     (username: String, password: String) => Sync[F].delay {
       val url = "https://sso.three.ie/mylogin//login?service=https%3A%2F%2Fmy3account.three.ie%2FMy_account_balance"
       val browser: JsoupBrowser = JsoupBrowser.typed()
@@ -42,7 +43,7 @@ trait MobileCarrierClientInstances {
       balance
     }
 
-  implicit def timMobileCarrierClient[F[_] : Sync]: MobileCarrierClient[F, Tim] =
+  implicit def timMobileCarrierClient[F[_] : Sync]: MobileCarrierClient[F, TimIt] =
     (username: String, password: String) => Sync[F].delay {
       val browser: JsoupBrowser = JsoupBrowser.typed()
 
