@@ -2,19 +2,20 @@ package com.github.niqdev
 
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, toFlatMapOps, toFunctorOps}
-import com.github.niqdev.model.Settings
+import com.github.niqdev.algebra.MobileCarrierClient
+import com.github.niqdev.model.{Settings, Three, Tim}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object Main extends IOApp {
 
-  // TODO async?
+  // TODO run in parallel: parSequence
   private[this] def program[F[_] : Sync](log: Logger[F]): F[Unit] =
     for {
       _ <- log.info("Hello World")
       settings <- Settings.load[F]
-      threeBalance <- Scraper.threeIe("", "")
-      timBalance <- Scraper.timIt("", "")
+      threeBalance <- MobileCarrierClient[F, Three].balance("", "")
+      timBalance <- MobileCarrierClient[F, Tim].balance("", "")
       _ <- log.info(s"$settings")
       _ <- log.info(s"Balances: [Three=$threeBalance][Tim=$timBalance]")
     } yield ()
