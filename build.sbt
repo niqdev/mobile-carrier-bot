@@ -31,5 +31,6 @@ lazy val root = project
     name := "mobile-carrier-bot",
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
     addCommandAlias("format", ";scalafmtAll;scalafmtSbt"),
-    addCommandAlias("update", ";dependencyUpdates;reload plugins;dependencyUpdates;reload return")
+    addCommandAlias("update", ";dependencyUpdates;reload plugins;dependencyUpdates;reload return"),
+    addCommandAlias("build", ";checkFormat;clean;test")
   )

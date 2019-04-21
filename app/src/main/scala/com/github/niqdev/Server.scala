@@ -7,10 +7,8 @@ import com.github.niqdev.http.HealthCheckEndpoint
 import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.http4s.HttpRoutes
-import org.http4s.dsl.io._
-import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.syntax.kleisli.http4sKleisliResponseSyntax
 
 /*
  * TODO
@@ -35,13 +33,6 @@ object Server extends IOApp {
       _ <- log.info(s"$settings")
       _ <- log.info(balances)
     } yield ()
-
-  val helloWorldService = HttpRoutes
-    .of[IO] {
-      case GET -> Root / "hello" / name =>
-        Ok(s"Hello, $name.")
-    }
-    .orNotFound
 
   private[this] def server: IO[ExitCode] =
     BlazeServerBuilder[IO]
