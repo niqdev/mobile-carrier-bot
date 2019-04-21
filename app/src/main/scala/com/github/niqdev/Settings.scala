@@ -10,7 +10,7 @@ case class Settings(environment: NonEmptyString)
 
 object Settings {
 
-  def load[F[_] : Sync]: F[Settings] =
+  def load[F[_]: Sync]: F[Settings] =
     loadConfig(
       envF[F, NonEmptyString]("ENVIRONMENT")
     )(Settings.apply).orRaiseThrowable

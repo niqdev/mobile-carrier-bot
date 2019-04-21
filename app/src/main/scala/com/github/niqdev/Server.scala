@@ -21,12 +21,13 @@ import org.http4s.server.blaze.BlazeServerBuilder
  */
 object Server extends IOApp {
 
-  private[this] def retrieveBalances[F[_] : Sync]: F[String] = (
-    MobileCarrierClient[F, ThreeIe].balance("", ""),
-    MobileCarrierClient[F, TimIt].balance("", "")
-  ).mapN((threeBalance, timBalance) => s"Balances: [Three=$threeBalance][Tim=$timBalance]")
+  private[this] def retrieveBalances[F[_]: Sync]: F[String] =
+    (
+      MobileCarrierClient[F, ThreeIe].balance("", ""),
+      MobileCarrierClient[F, TimIt].balance("", "")
+    ).mapN((threeBalance, timBalance) => s"Balances: [Three=$threeBalance][Tim=$timBalance]")
 
-  private[this] def program[F[_] : Sync](log: Logger[F]): F[Unit] =
+  private[this] def program[F[_]: Sync](log: Logger[F]): F[Unit] =
     for {
       _ <- log.info("Hello World")
       settings <- Settings.load[F]
@@ -35,10 +36,12 @@ object Server extends IOApp {
       _ <- log.info(balances)
     } yield ()
 
-  val helloWorldService = HttpRoutes.of[IO] {
-    case GET -> Root / "hello" / name =>
-      Ok(s"Hello, $name.")
-  }.orNotFound
+  val helloWorldService = HttpRoutes
+    .of[IO] {
+      case GET -> Root / "hello" / name =>
+        Ok(s"Hello, $name.")
+    }
+    .orNotFound
 
   private[this] def server: IO[ExitCode] =
     BlazeServerBuilder[IO]
@@ -48,17 +51,18 @@ object Server extends IOApp {
       .use(_ => IO.never)
       .as(ExitCode.Success)
 
-  private[this] def error[F[_] : Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
+  private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
     log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
 
-  private[this] def success[F[_] : Sync, T](log: Logger[F]): T => F[ExitCode] =
+  private[this] def success[F[_]: Sync, T](log: Logger[F]): T => F[ExitCode] =
     _ => log.info("Application succeeded") *> Sync[F].pure(ExitCode.Success)
 
   /**
     *
     */
   override def run(args: List[String]): IO[ExitCode] =
-    Slf4jLogger.create[IO].flatMap(log =>
-      program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+    Slf4jLogger
+      .create[IO]
+      .flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
 
 }
