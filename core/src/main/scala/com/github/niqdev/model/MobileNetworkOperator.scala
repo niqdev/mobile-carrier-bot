@@ -15,8 +15,8 @@ import eu.timepit.refined.string.Url
   */
 @silent
 sealed abstract class MobileNetworkOperator(
-    countryCallingCode: Int Refined Positive,
-    website: String Refined Url
+  countryCallingCode: Int Refined Positive,
+  website: String Refined Url
 ) extends EnumEntry
     with Snakecase
     with Uppercase
