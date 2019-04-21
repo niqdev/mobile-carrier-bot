@@ -3,8 +3,8 @@ package com.github.niqdev
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, catsSyntaxTuple2Semigroupal, toFlatMapOps, toFunctorOps}
 import com.github.niqdev.algebra.MobileCarrierClient
+import com.github.niqdev.http.HealthCheckEndpoint
 import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
-import com.github.niqdev.model.Settings
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.HttpRoutes
@@ -19,7 +19,7 @@ import org.http4s.server.blaze.BlazeServerBuilder
  *
  * tests ???
  */
-object Main extends IOApp {
+object Server extends IOApp {
 
   private[this] def retrieveBalances[F[_] : Sync]: F[String] = (
     MobileCarrierClient[F, ThreeIe].balance("", ""),
@@ -43,7 +43,7 @@ object Main extends IOApp {
   private[this] def server: IO[ExitCode] =
     BlazeServerBuilder[IO]
       .bindHttp(8080, "localhost")
-      .withHttpApp(Main.helloWorldService)
+      .withHttpApp(HealthCheckEndpoint[IO].routes.orNotFound)
       .resource
       .use(_ => IO.never)
       .as(ExitCode.Success)

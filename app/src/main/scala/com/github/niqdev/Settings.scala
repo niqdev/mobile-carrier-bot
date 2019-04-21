@@ -1,5 +1,4 @@
 package com.github.niqdev
-package model
 
 import cats.effect.Sync
 import ciris.cats.catsMonadErrorToCiris

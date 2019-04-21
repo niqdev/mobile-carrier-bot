@@ -1,16 +1,22 @@
-import Dependencies.{compilerPluginDependencies, libDependencies, testDependencies}
+import Dependencies.{appDependencies, coreDependencies, sharedDependencies, testDependencies}
 
-lazy val lib = (project in file("lib"))
+lazy val app = (project in file("app"))
+  .dependsOn(core)
   .settings(
     resolvers += Resolver.sonatypeRepo("snapshots"),
 
-    libraryDependencies ++=
-      libDependencies.map(_.withSources).map(_.withJavadoc) ++
-        testDependencies ++
-        compilerPluginDependencies
+    libraryDependencies ++= (appDependencies ++ sharedDependencies ++ testDependencies)
+      .map(_.withSources).map(_.withJavadoc)
+  )
+
+lazy val core = (project in file("core"))
+  .settings(
+    libraryDependencies ++= (coreDependencies ++ sharedDependencies ++ testDependencies)
+      .map(_.withSources).map(_.withJavadoc)
   )
 
 lazy val root = project.in(file("."))
+  .aggregate(app, core)
   .settings(
     inThisBuild(List(
       organization := "com.github.niqdev",
