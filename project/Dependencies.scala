@@ -15,6 +15,7 @@ object Dependencies {
     // app
     val ciris = "0.12.1"
     val http4s = "0.20.0-SNAPSHOT"
+    val circe = "0.11.1"
 
     // core
     val scalaScraper = "2.1.0"
@@ -42,7 +43,9 @@ object Dependencies {
     "org.http4s" %% "http4s-dsl" % V.http4s,
     "org.http4s" %% "http4s-blaze-server" % V.http4s,
     "org.http4s" %% "http4s-blaze-client" % V.http4s,
-    "org.http4s" %% "http4s-circe" % V.http4s
+    "org.http4s" %% "http4s-circe" % V.http4s,
+    "io.circe" %% "circe-generic" % V.circe,
+    "io.circe" %% "circe-literal" % V.circe
   )
 
   lazy val coreDependencies = Seq(

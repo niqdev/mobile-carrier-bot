@@ -2,6 +2,7 @@ package com.github.niqdev
 
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, catsSyntaxTuple2Semigroupal, toFlatMapOps, toFunctorOps}
+import com.github.ghik.silencer.silent
 import com.github.niqdev.algebra.MobileCarrierClient
 import com.github.niqdev.http.HealthCheckEndpoint
 import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
@@ -25,6 +26,7 @@ object Server extends IOApp {
       MobileCarrierClient[F, TimIt].balance("", "")
     ).mapN((threeBalance, timBalance) => s"Balances: [Three=$threeBalance][Tim=$timBalance]")
 
+  @silent
   private[this] def program[F[_]: Sync](log: Logger[F]): F[Unit] =
     for {
       _ <- log.info("Hello World")
@@ -54,6 +56,7 @@ object Server extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     Slf4jLogger
       .create[IO]
-      .flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+      //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+      .flatMap(log => server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
 
 }

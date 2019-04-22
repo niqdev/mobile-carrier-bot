@@ -1,7 +1,22 @@
 import Dependencies.{appDependencies, coreDependencies, sharedDependencies, testDependencies}
 
+lazy val I = new {
+  val organization = "com.github.niqdev"
+  val name = "mobile-carrier-bot"
+  // TODO sbt-dynver
+  val version = "0.1"
+}
+
+lazy val buildInfoSettings = Seq(
+  buildInfoKeys := Seq[BuildInfoKey]("name" -> I.name, version, scalaVersion, sbtVersion),
+  buildInfoPackage := I.organization,
+  buildInfoOptions += BuildInfoOption.BuildTime
+)
+
 lazy val app = (project in file("app"))
   .dependsOn(core)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(buildInfoSettings)
   .settings(
     resolvers += Resolver.sonatypeRepo("snapshots"),
     libraryDependencies ++= (appDependencies ++ sharedDependencies ++ testDependencies)
@@ -20,15 +35,15 @@ lazy val root = project
   .in(file("."))
   .aggregate(app, core)
   .settings(
+    name := I.name,
     inThisBuild(
       List(
-        organization := "com.github.niqdev",
+        organization := I.organization,
         scalaVersion := "2.12.8",
-        // TODO sbt-dynver
-        version := "0.1"
+        version := I.version
       )
     ),
-    name := "mobile-carrier-bot",
+
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
     addCommandAlias("format", ";scalafmtAll;scalafmtSbt"),
     addCommandAlias("update", ";dependencyUpdates;reload plugins;dependencyUpdates;reload return"),
