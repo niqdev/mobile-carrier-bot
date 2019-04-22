@@ -17,6 +17,7 @@ sbt test
 * `checkFormat` checks format
 * `format` formats sources
 * `update` checks outdated dependencies
+* `build` checks format and runs tests
 
 ### other sbt plugins
 
