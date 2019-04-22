@@ -18,9 +18,6 @@ sbt test
 * `format` formats sources
 * `update` checks outdated dependencies
 
-### sbt plugins
+### other sbt plugins
 
-```bash
-# show project dependencies
-sbt dependencyTree
-```
+* `dependencyTree` shows project dependencies

@@ -43,7 +43,6 @@ lazy val root = project
         version := I.version
       )
     ),
-
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
     addCommandAlias("format", ";scalafmtAll;scalafmtSbt"),
     addCommandAlias("update", ";dependencyUpdates;reload plugins;dependencyUpdates;reload return"),
