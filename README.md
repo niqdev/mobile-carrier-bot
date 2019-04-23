@@ -2,6 +2,13 @@
 
 A bot to access mobile carrier services implemented in Scala using Tagless Final style
 
+## Endpoints
+
+```
+# healt check
+http :8080
+```
+
 ## Development
 
 > TODO

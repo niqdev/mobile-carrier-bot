@@ -35,9 +35,19 @@ object Main extends IOApp {
       _ <- log.info(balances)
     } yield ()
 
-  private[this] def server(settings: Settings): IO[ExitCode] =
+  // TODO move in http package
+  @silent
+  private[this] def server0(settings: Settings): IO[ExitCode] =
     BlazeServerBuilder[IO]
       .bindHttp(settings.httpPort.value, settings.httpHost.value)
+      .withHttpApp(Api.endpoints[IO])
+      .resource
+      .use(_ => IO.never)
+      .as(ExitCode.Success)
+
+  private[this] def server: IO[ExitCode] =
+    BlazeServerBuilder[IO]
+      .bindHttp(8080, "localhost")
       .withHttpApp(Api.endpoints[IO])
       .resource
       .use(_ => IO.never)
@@ -52,10 +62,10 @@ object Main extends IOApp {
   /**
     *
     */
-  override def run(args: List[String]): IO[ExitCode] = ???
-//    Slf4jLogger
-//      .create[IO]
-//      //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
-//      .flatMap(log => server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+  override def run(args: List[String]): IO[ExitCode] =
+    Slf4jLogger
+      .create[IO]
+      //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+      .flatMap(log => server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
 
 }
