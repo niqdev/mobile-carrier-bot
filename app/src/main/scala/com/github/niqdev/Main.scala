@@ -4,7 +4,7 @@ import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, catsSyntaxTuple2Semigroupal, toFlatMapOps, toFunctorOps}
 import com.github.ghik.silencer.silent
 import com.github.niqdev.algebra.MobileCarrierClient
-import com.github.niqdev.http.Api
+import com.github.niqdev.http.{Api, TelegramClient}
 import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -45,6 +45,7 @@ object Main extends IOApp {
       .use(_ => IO.never)
       .as(ExitCode.Success)
 
+  @silent
   private[this] def server: IO[ExitCode] =
     BlazeServerBuilder[IO]
       .bindHttp(8080, "localhost")
@@ -57,7 +58,7 @@ object Main extends IOApp {
     log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
 
   private[this] def success[F[_]: Sync, T](log: Logger[F]): T => F[ExitCode] =
-    _ => log.info("Application succeeded") *> Sync[F].pure(ExitCode.Success)
+    s => log.info(s"Application succeeded: $s") *> Sync[F].pure(ExitCode.Success)
 
   /**
     *
@@ -66,6 +67,6 @@ object Main extends IOApp {
     Slf4jLogger
       .create[IO]
       //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
-      .flatMap(log => server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+      .flatMap(log => TelegramClient.updates.redeemWith(error[IO](log), success[IO, String](log)))
 
 }
