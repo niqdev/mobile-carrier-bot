@@ -29,3 +29,7 @@ sbt test
 ### other sbt plugins
 
 * `dependencyTree` shows project dependencies
+
+TODO
+
+https://github.com/topics/http4s
