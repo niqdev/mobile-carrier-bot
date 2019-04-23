@@ -4,12 +4,11 @@ import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits.{catsSyntaxApply, catsSyntaxTuple2Semigroupal, toFlatMapOps, toFunctorOps}
 import com.github.ghik.silencer.silent
 import com.github.niqdev.algebra.MobileCarrierClient
-import com.github.niqdev.http.HealthCheckEndpoint
+import com.github.niqdev.http.Api
 import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.syntax.kleisli.http4sKleisliResponseSyntax
 
 /*
  * TODO
@@ -18,7 +17,7 @@ import org.http4s.syntax.kleisli.http4sKleisliResponseSyntax
  *
  * tests ???
  */
-object Server extends IOApp {
+object Main extends IOApp {
 
   private[this] def retrieveBalances[F[_]: Sync]: F[String] =
     (
@@ -36,10 +35,10 @@ object Server extends IOApp {
       _ <- log.info(balances)
     } yield ()
 
-  private[this] def server: IO[ExitCode] =
+  private[this] def server(settings: Settings): IO[ExitCode] =
     BlazeServerBuilder[IO]
-      .bindHttp(8080, "localhost")
-      .withHttpApp(HealthCheckEndpoint[IO].routes.orNotFound)
+      .bindHttp(settings.httpPort.value, settings.httpHost.value)
+      .withHttpApp(Api.endpoints[IO])
       .resource
       .use(_ => IO.never)
       .as(ExitCode.Success)
@@ -53,10 +52,10 @@ object Server extends IOApp {
   /**
     *
     */
-  override def run(args: List[String]): IO[ExitCode] =
-    Slf4jLogger
-      .create[IO]
-      //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
-      .flatMap(log => server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+  override def run(args: List[String]): IO[ExitCode] = ???
+//    Slf4jLogger
+//      .create[IO]
+//      //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
+//      .flatMap(log => server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
 
 }

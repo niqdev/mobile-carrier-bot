@@ -10,7 +10,7 @@ import org.http4s.{HttpRoutes, Method}
 
 sealed abstract class HealthCheckEndpoint[F[_]: Sync] extends Http4sDsl[F] {
 
-  def routes: HttpRoutes[F] =
+  private[http] def routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root => Ok(buildInformation.asJson)
     }
