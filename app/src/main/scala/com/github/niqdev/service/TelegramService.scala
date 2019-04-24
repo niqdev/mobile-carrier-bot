@@ -1,10 +1,9 @@
-package com.github.niqdev
-package http
+package com.github.niqdev.service
 
 import cats.effect.{ContextShift, IO, Timer}
 import org.http4s.client.blaze.BlazeClientBuilder
 
-object TelegramClient {
+object TelegramService {
 
   import scala.concurrent.ExecutionContext.global
 

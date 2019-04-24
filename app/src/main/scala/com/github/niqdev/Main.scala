@@ -1,40 +1,39 @@
 package com.github.niqdev
 
-import cats.effect.{ExitCode, IO, IOApp, Sync}
-import cats.implicits.{catsSyntaxApply, catsSyntaxTuple2Semigroupal, toFlatMapOps, toFunctorOps}
+import java.util.concurrent.{ExecutorService, Executors, TimeUnit}
+
+import cats.effect._
+import cats.implicits.{catsSyntaxApply, toFlatMapOps, toFunctorOps}
 import com.github.ghik.silencer.silent
-import com.github.niqdev.algebra.MobileCarrierClient
-import com.github.niqdev.http.{Api, TelegramClient}
-import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
+import com.github.niqdev.http.Http
+import com.github.niqdev.service.MobileCarrierService
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.http4s.server.blaze.BlazeServerBuilder
 
-/*
- * TODO
- * parMapN Sync instead of IO https://typelevel.org/cats-effect/datatypes/io.html#parmapn
- * ValidateNel: accumulate errors
- *
- * tests ???
- */
-object Main extends IOApp {
+import scala.concurrent.ExecutionContext
 
-  private[this] def retrieveBalances[F[_]: Sync]: F[String] =
-    (
-      MobileCarrierClient[F, ThreeIe].balance("", ""),
-      MobileCarrierClient[F, TimIt].balance("", "")
-    ).mapN((threeBalance, timBalance) => s"Balances: [Three=$threeBalance][Tim=$timBalance]")
+object Main extends IOApp.WithContext {
+
+  def program0[F[_]: Sync](implicit E: ConcurrentEffect[F], T: Timer[F]) =
+    (for {
+      settings <- Resource.liftF(Settings.load[F])
+      _ <- Http[F].client(executionContext)
+      server <- Http[F].server(settings)
+    } yield server).allocated
 
   @silent
-  private[this] def program[F[_]: Sync](log: Logger[F]): F[Unit] =
+  private[this] def program[F[_]: Sync](log: Logger[F])(implicit E: ConcurrentEffect[F],
+                                                        T: Timer[F]): F[Unit] =
     for {
       _ <- log.info("Hello World")
       settings <- Settings.load[F]
-      balances <- retrieveBalances[F]
+      _ <- program0
+      balances <- MobileCarrierService.retrieveBalances[F]
       _ <- log.info(s"$settings")
       _ <- log.info(balances)
     } yield ()
 
+  /*
   // TODO move in http package
   @silent
   private[this] def server0(settings: Settings): IO[ExitCode] =
@@ -53,6 +52,7 @@ object Main extends IOApp {
       .resource
       .use(_ => IO.never)
       .as(ExitCode.Success)
+   */
 
   private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
     log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
@@ -66,7 +66,19 @@ object Main extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     Slf4jLogger
       .create[IO]
-      //.flatMap(log => program[IO](log) *> server.redeemWith(error[IO](log), success[IO, ExitCode](log)))
-      .flatMap(log => TelegramClient.updates.redeemWith(error[IO](log), success[IO, String](log)))
+      .flatMap(log => program[IO](log).redeemWith(error[IO](log), success[IO, Unit](log)))
 
+  override protected def executionContextResource: Resource[SyncIO, ExecutionContext] = {
+    val acquire = SyncIO(Executors.newCachedThreadPool())
+    val release: ExecutorService => SyncIO[Unit] = pool =>
+      SyncIO {
+        pool.shutdown()
+        pool.awaitTermination(10, TimeUnit.SECONDS)
+        ()
+      }
+
+    Resource
+      .make(acquire)(release)
+      .map(ExecutionContext.fromExecutorService)
+  }
 }

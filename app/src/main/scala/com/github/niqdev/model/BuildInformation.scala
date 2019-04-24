@@ -14,6 +14,6 @@ object BuildInformation {
   implicit val buildInformationEncoder: Encoder[BuildInformation] =
     deriveEncoder[BuildInformation]
 
-  implicit def buildInformationEntityEncoder[F[_] : Applicative]: EntityEncoder[F, BuildInformation] =
+  implicit def buildInformationEntityEncoder[F[_]: Applicative]: EntityEncoder[F, BuildInformation] =
     jsonEncoderOf[F, BuildInformation]
 }
