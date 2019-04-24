@@ -44,8 +44,10 @@ object Dependencies {
     "org.http4s" %% "http4s-blaze-server" % V.http4s,
     "org.http4s" %% "http4s-blaze-client" % V.http4s,
     "org.http4s" %% "http4s-circe" % V.http4s,
+    "io.circe" %% "circe-core" % V.circe,
     "io.circe" %% "circe-generic" % V.circe,
-    "io.circe" %% "circe-literal" % V.circe
+    "io.circe" %% "circe-literal" % V.circe,
+    "io.circe" %% "circe-refined" % V.circe
   )
 
   lazy val coreDependencies = Seq(

@@ -3,7 +3,7 @@ package http
 
 import cats.data.Kleisli
 import cats.effect.{ConcurrentEffect, Resource, Timer}
-import com.github.niqdev.model.Settings
+import com.github.niqdev.model.Configurations
 import com.github.niqdev.service.HealthCheckService
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -16,13 +16,13 @@ import scala.concurrent.ExecutionContext
 
 sealed abstract class Http[F[_]](implicit E: ConcurrentEffect[F], T: Timer[F]) {
 
-  private[http] def endpoints: Kleisli[F, Request[F], Response[F]] =
-    HealthCheckEndpoint[F].routes(HealthCheckService[F]()).orNotFound
+  private[http] def endpoints(configurations: Configurations): Kleisli[F, Request[F], Response[F]] =
+    HealthCheckEndpoints.endpoints[F](HealthCheckService[F](), configurations).orNotFound
 
-  def server(settings: Settings): Resource[F, Server[F]] =
+  def server(configurations: Configurations): Resource[F, Server[F]] =
     BlazeServerBuilder[F]
-      .bindHttp(settings.httpPort.value, settings.httpHost.value)
-      .withHttpApp(endpoints)
+      .bindHttp(configurations.httpPort.value, configurations.httpHost.value)
+      .withHttpApp(endpoints(configurations))
       .resource
 
   def client(implicit executionContext: ExecutionContext): Resource[F, Client[F]] =

@@ -18,5 +18,7 @@ sealed abstract class HealthCheckService[F[_]: Sync] {
 }
 
 object HealthCheckService {
-  def apply[F[_]: Sync](): HealthCheckService[F] = new HealthCheckService[F] {}
+
+  def apply[F[_]: Sync](): HealthCheckService[F] =
+    new HealthCheckService[F] {}
 }
