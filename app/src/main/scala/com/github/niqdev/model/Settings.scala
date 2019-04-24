@@ -1,5 +1,6 @@
-package com.github.niqdev
+package com.github.niqdev.model
 
+import cats.Show
 import cats.effect.Sync
 import ciris.cats.catsMonadErrorToCiris
 import ciris.refined.refTypeConfigDecoder
@@ -18,7 +19,7 @@ object Settings {
   private[this] val defaultEnvironment: NonEmptyString = "dev"
   private[this] val defaultPort: PosInt = 8080
   private[this] val defaultHost: NonEmptyString = "localhost"
-  private[this] val invalidTelegramApiToken: NonEmptyString = "xxx"
+  private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
 
   def load[F[_]: Sync]: F[Settings] =
     loadConfig(
@@ -29,7 +30,15 @@ object Settings {
       envF[F, NonEmptyString]("HTTP_HOST")
         .orValue(defaultHost),
       envF[F, NonEmptyString]("TELEGRAM_API_TOKEN")
-        .orValue(invalidTelegramApiToken)
+        .orValue(defaultTelegramApiToken)
     )(Settings.apply).orRaiseThrowable
+
+  implicit val settingsShow: Show[Settings] =
+    (settings: Settings) => s"""
+         |ENVIRONMENT=${settings.environment}
+         |HTTP_PORT=${settings.httpPort}
+         |HTTP_HOST=${settings.httpHost}
+         |TELEGRAM_API_TOKEN=${settings.telegramApiToken}
+       """.stripMargin
 
 }

@@ -3,6 +3,7 @@ package http
 
 import cats.data.Kleisli
 import cats.effect.{ConcurrentEffect, Resource, Timer}
+import com.github.niqdev.model.Settings
 import com.github.niqdev.service.HealthCheckService
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
