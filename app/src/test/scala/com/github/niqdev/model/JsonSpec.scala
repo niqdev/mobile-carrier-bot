@@ -5,13 +5,18 @@ import io.circe.parser.parse
 import io.circe.{ Decoder, DecodingFailure, Json }
 import org.scalatest.{ Matchers, WordSpecLike }
 
-final case class Chat(id: Long, firstName: String)
+// TODO refined + enumeratum (check Long)
+// TODO filter is_bot
+final case class Chat(id: Long, firstName: String, language: String)
+// TODO message_id, date and update_id + make fields optional
+// TODO strict only on required fields, ignore everything else
+// https://core.telegram.org/bots/api#message
 final case class Message(chat: Chat, text: String)
 
 final class JsonSpec extends WordSpecLike with Matchers {
 
   implicit val chatDecoder: Decoder[Chat] =
-    Decoder.forProduct2("id", "first_name")(Chat.apply)
+    Decoder.forProduct3("id", "first_name", "language_code")(Chat.apply)
 
   private[this] def result(json: Json): Vector[Json] =
     json.hcursor
@@ -67,9 +72,9 @@ final class JsonSpec extends WordSpecLike with Matchers {
       val messages: Vector[Either[DecodingFailure, Message]] =
         messagesJson.map { json =>
           val eitherMessage = for {
-            chat <- json.hcursor.downField("message").get[Chat]("chat")
+            from <- json.hcursor.downField("message").get[Chat]("from")
             text <- json.hcursor.downField("message").get[String]("text")
-          } yield Message(chat, text)
+          } yield Message(from, text)
 
           eitherMessage
         }
