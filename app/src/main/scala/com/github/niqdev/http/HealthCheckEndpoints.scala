@@ -6,7 +6,7 @@ import cats.implicits.toSemigroupKOps
 import com.github.niqdev.model.Configurations
 import com.github.niqdev.service.HealthCheckService
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{HttpRoutes, Method}
+import org.http4s.{ HttpRoutes, Method }
 
 sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Http4sDsl[F] {
 
@@ -22,11 +22,10 @@ sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Http4sDsl[F] {
         Ok(service.buildInformation)
     }
 
-  // TODO only on dev
   private[http] def configEndpoint(configurations: Configurations): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root / "config" =>
-        Ok(configurations)
+        Ok(Configurations.obfuscate(configurations))
     }
 
   def endpoints(service: HealthCheckService[F], configurations: Configurations): HttpRoutes[F] =

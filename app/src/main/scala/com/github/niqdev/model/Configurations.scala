@@ -41,9 +41,9 @@ object Configurations extends ConfigurationsInstances {
 
   import eu.timepit.refined.auto.autoRefineV
 
-  private[this] val defaultEnvironment: NonEmptyString = "dev"
-  private[this] val defaultPort: PosInt = 8080
-  private[this] val defaultHost: NonEmptyString = "localhost"
+  private[this] val defaultEnvironment: NonEmptyString      = "dev"
+  private[this] val defaultPort: PosInt                     = 8080
+  private[this] val defaultHost: NonEmptyString             = "localhost"
   private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
 
   def load[F[_]: Sync]: F[Configurations] =
@@ -57,5 +57,11 @@ object Configurations extends ConfigurationsInstances {
       envF[F, NonEmptyString]("TELEGRAM_API_TOKEN")
         .orValue(defaultTelegramApiToken)
     )(Configurations.apply).orRaiseThrowable
+
+  def obfuscate(configurations: Configurations): Configurations =
+    if (configurations.environment != defaultEnvironment)
+      configurations.copy(telegramApiToken = defaultTelegramApiToken)
+    else
+      configurations
 
 }
