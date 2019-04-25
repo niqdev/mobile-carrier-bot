@@ -1,11 +1,10 @@
 package com.github.niqdev.model
 
 import cats.effect.Sync
-import cats.{Applicative, Show}
+import cats.{ Applicative, Show }
 import ciris.cats.catsMonadErrorToCiris
 import ciris.refined.refTypeConfigDecoder
-import ciris.{envF, loadConfig}
-import eu.timepit.refined.auto.autoRefineV
+import ciris.{ envF, loadConfig }
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
@@ -18,7 +17,29 @@ final case class Configurations(environment: NonEmptyString,
                                 httpHost: NonEmptyString,
                                 telegramApiToken: NonEmptyString)
 
-object Configurations {
+sealed trait ConfigurationsInstances {
+
+  import io.circe.refined.refinedEncoder
+
+  implicit val configurationsEncoder: Encoder[Configurations] =
+    deriveEncoder[Configurations]
+
+  implicit def configurationsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Configurations] =
+    jsonEncoderOf[F, Configurations]
+
+  implicit val settingsShow: Show[Configurations] =
+    (settings: Configurations) => s"""
+         |ENVIRONMENT=${settings.environment}
+         |HTTP_PORT=${settings.httpPort}
+         |HTTP_HOST=${settings.httpHost}
+         |TELEGRAM_API_TOKEN=${settings.telegramApiToken}
+       """.stripMargin
+
+}
+
+object Configurations extends ConfigurationsInstances {
+
+  import eu.timepit.refined.auto.autoRefineV
 
   private[this] val defaultEnvironment: NonEmptyString = "dev"
   private[this] val defaultPort: PosInt = 8080
@@ -36,19 +57,5 @@ object Configurations {
       envF[F, NonEmptyString]("TELEGRAM_API_TOKEN")
         .orValue(defaultTelegramApiToken)
     )(Configurations.apply).orRaiseThrowable
-
-  implicit val settingsShow: Show[Configurations] =
-    (settings: Configurations) => s"""
-         |ENVIRONMENT=${settings.environment}
-         |HTTP_PORT=${settings.httpPort}
-         |HTTP_HOST=${settings.httpHost}
-         |TELEGRAM_API_TOKEN=${settings.telegramApiToken}
-       """.stripMargin
-
-  implicit val settingsEncoder: Encoder[Configurations] =
-    deriveEncoder[Configurations]
-
-  implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Configurations] =
-    jsonEncoderOf[F, Configurations]
 
 }
