@@ -2,7 +2,7 @@ package com.github.niqdev
 package http
 
 import cats.data.Kleisli
-import cats.effect.{ConcurrentEffect, Resource, Timer}
+import cats.effect.{ ConcurrentEffect, Resource, Timer }
 import com.github.niqdev.model.Configurations
 import com.github.niqdev.service.HealthCheckService
 import org.http4s.client.Client
@@ -10,7 +10,7 @@ import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli.http4sKleisliResponseSyntax
-import org.http4s.{Request, Response}
+import org.http4s.{ Request, Response }
 
 import scala.concurrent.ExecutionContext
 

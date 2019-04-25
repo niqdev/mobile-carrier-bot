@@ -4,9 +4,9 @@ package algebra
 import java.util.UUID
 
 import cats.effect.Sync
-import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
+import com.github.niqdev.model.MobileNetworkOperator.{ ThreeIe, TimIt }
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
-import net.ruippeixotog.scalascraper.dsl.DSL.Extract.{attr, element, text}
+import net.ruippeixotog.scalascraper.dsl.DSL.Extract.{ attr, element, text }
 import net.ruippeixotog.scalascraper.dsl.DSL._
 
 // TODO Credentials, Balance, refined
@@ -26,7 +26,7 @@ trait MobileCarrierClientInstances {
         val url =
           "https://sso.three.ie/mylogin//login?service=https%3A%2F%2Fmy3account.three.ie%2FMy_account_balance"
         val browser: JsoupBrowser = JsoupBrowser.typed()
-        val docGet = browser.get(url)
+        val docGet                = browser.get(url)
 
         val lt = docGet >> attr("value")("input[name=lt]")
         //val cookie = browser.cookies("")("JSESSIONID")
@@ -37,10 +37,10 @@ trait MobileCarrierClientInstances {
           "lt" -> lt
         )
 
-        val docPost = browser.post(url, form)
+        val docPost      = browser.post(url, form)
         val redirectLink = docPost >> attr("href")("a[target=_parent]")
-        val redirect = browser.get(redirectLink)
-        val balance = redirect >> element("div.P54_myAccountBalance_w1") >> text("td.twenty")
+        val redirect     = browser.get(redirectLink)
+        val balance      = redirect >> element("div.P54_myAccountBalance_w1") >> text("td.twenty")
         balance
       }
 

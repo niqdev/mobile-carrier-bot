@@ -2,8 +2,8 @@ package com.github.niqdev
 package model
 
 import com.github.ghik.silencer.silent
-import enumeratum.EnumEntry.{Snakecase, Uppercase}
-import enumeratum.{Enum, EnumEntry}
+import enumeratum.EnumEntry.{ Snakecase, Uppercase }
+import enumeratum.{ Enum, EnumEntry }
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto.autoRefineV
 import eu.timepit.refined.numeric.Positive
@@ -31,5 +31,5 @@ object MobileNetworkOperator extends Enum[MobileNetworkOperator] {
   case object TimIt extends MobileNetworkOperator(countryCallingCode = 39, website = "https://www.tim.it")
 
   final type ThreeIe = ThreeIe.type
-  final type TimIt = TimIt.type
+  final type TimIt   = TimIt.type
 }

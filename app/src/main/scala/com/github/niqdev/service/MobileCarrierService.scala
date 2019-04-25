@@ -4,7 +4,7 @@ package service
 import cats.effect.Sync
 import cats.implicits.catsSyntaxTuple2Semigroupal
 import com.github.niqdev.algebra.MobileCarrierClient
-import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
+import com.github.niqdev.model.MobileNetworkOperator.{ ThreeIe, TimIt }
 
 /*
  * TODO

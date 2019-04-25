@@ -1,6 +1,6 @@
 package com.github.niqdev
 
-import java.util.concurrent.{ExecutorService, Executors, TimeUnit}
+import java.util.concurrent.{ ExecutorService, Executors, TimeUnit }
 
 import cats.effect._
 import cats.implicits.toFunctorOps

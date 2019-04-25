@@ -1,7 +1,7 @@
 package com.github.niqdev
 package model
 
-import com.github.niqdev.model.MobileNetworkOperator.{ThreeIe, TimIt}
+import com.github.niqdev.model.MobileNetworkOperator.{ ThreeIe, TimIt }
 
 final class MobileNetworkOperatorSpec extends BaseSpec {
 
