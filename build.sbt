@@ -1,14 +1,14 @@
-import Dependencies.{appDependencies, coreDependencies, sharedDependencies, testDependencies}
+import Dependencies.{ appDependencies, coreDependencies, sharedDependencies, testDependencies }
 
 lazy val I = new {
   val organization = "com.github.niqdev"
-  val name = "mobile-carrier-bot"
+  val name         = "mobile-carrier-bot"
   // TODO sbt-dynver
   val version = "0.1"
 }
 
 lazy val buildInfoSettings = Seq(
-  buildInfoKeys := Seq[BuildInfoKey]("name" -> I.name, version, scalaVersion, sbtVersion),
+  buildInfoKeys    := Seq[BuildInfoKey]("name" -> I.name, version, scalaVersion, sbtVersion),
   buildInfoPackage := I.organization,
   buildInfoOptions += BuildInfoOption.BuildTime
 )
@@ -40,7 +40,7 @@ lazy val root = project
       List(
         organization := I.organization,
         scalaVersion := "2.12.8",
-        version := I.version
+        version      := I.version
       )
     ),
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
