@@ -7,6 +7,13 @@ import org.scalatest.{Matchers, WordSpecLike}
 
 final class TelegramModelSpec extends WordSpecLike with Matchers {
 
+  private[this] def result(json: Json): Vector[Json] =
+    json.hcursor
+      .downField("result")
+      .focus
+      .flatMap(_.asArray)
+      .getOrElse(Vector.empty[Json])
+
   "TelegramModel" must {
 
     "parse json User with defaults" in {
@@ -21,6 +28,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
 
       val expectedUser = User(
         id = 123456789,
+        isBot = false,
         firstName = "MyFirstName"
       )
 
@@ -58,6 +66,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
       val text = "The Answer to the Ultimate Question of Life, The Universe, and Everything."
       val user = User(
         id = 123456789,
+        isBot = false,
         firstName = "MyFirstName"
       )
 
@@ -96,6 +105,48 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
       )
 
       json.as[Message] shouldBe Right(expectedMessage)
+    }
+
+    "parse json Response and ignore invalid messages" in {
+      val json: Json = parse(
+        """
+          |{
+          |  "ok": true,
+          |  "result": [
+          |    {
+          |      "message": {
+          |        "date": 1556273132,
+          |        "message_id": 1,
+          |        "text": "hello"
+          |      },
+          |      "update_id": 220544280
+          |    },
+          |    {
+          |      "edited_message": {
+          |        "date": 1556273133,
+          |        "message_id": 2,
+          |        "text": "bye"
+          |      },
+          |      "update_id": 220544281
+          |    }
+          |  ]
+          |}
+        """.stripMargin).getOrElse(Json.Null)
+
+      val expectedResponse = Response(
+        ok = true,
+        result = Some(Vector(
+          Update(
+            id = 220544280,
+            message = Message(
+              id = 1,
+              date = 1556273132,
+              text = Some("hello")
+            )
+          )
+        ))
+      )
+      json.as[Response[Vector[Update]]] shouldBe Right(expectedResponse)
     }
 
     /*

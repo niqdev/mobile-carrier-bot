@@ -1,6 +1,7 @@
 package com.github.niqdev
 package model
 
+import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{Decoder, HCursor}
 
 // TODO refined + enumeratum
@@ -18,7 +19,7 @@ import io.circe.{Decoder, HCursor}
   */
 final case class User(
   id: Long,
-  isBot: Boolean = false,
+  isBot: Boolean,
   firstName: String,
   lastName: Option[String] = None,
   username: Option[String] = None,
@@ -49,9 +50,9 @@ object User {
   */
 final case class Message(
   id: Long,
-  from: Option[User],
+  from: Option[User] = None,
   date: Long,
-  text: Option[String]
+  text: Option[String] = None,
 )
 
 object Message {
@@ -102,10 +103,16 @@ object ResponseParameters {
 /**
   * [[https://core.telegram.org/bots/api#making-requests Response]]
   */
-final case class UpdateResponse[T](
+final case class Response[T](
   ok: Boolean,
-  description: Option[String],
-  result: Option[T],
-  errorCode: Option[Long],
-  parameters: Option[ResponseParameters]
+  description: Option[String] = None,
+  result: Option[T] = None,
+  errorCode: Option[Long] = None,
+  parameters: Option[ResponseParameters] = None
 )
+
+object Response {
+
+  implicit val updateResponseDecoder: Decoder[Response[Vector[Update]]] =
+    deriveDecoder[Response[Vector[Update]]]
+}
