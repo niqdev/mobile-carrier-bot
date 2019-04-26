@@ -6,7 +6,7 @@ import cats.effect._
 import cats.implicits.toFunctorOps
 import cats.syntax.show.toShow
 import com.github.niqdev.http.Http
-import com.github.niqdev.model.Configurations
+import com.github.niqdev.model.Settings
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.Server
 
@@ -17,10 +17,10 @@ object Main extends IOApp.WithContext {
   def start[F[_]: ConcurrentEffect: Timer]: Resource[F, Server[F]] =
     for {
       log <- Resource.liftF(Slf4jLogger.create[F])
-      configurations <- Resource.liftF(Configurations.load[F])
-      _ <- Resource.liftF(log.debug(s"Configurations: ${configurations.show}"))
+      settings <- Resource.liftF(Settings.load[F])
+      _ <- Resource.liftF(log.debug(s"Settings: ${settings.show}"))
       _ <- Http[F].client(executionContext)
-      server <- Http[F].server(configurations)
+      server <- Http[F].server(settings)
     } yield server
 
   override protected def executionContextResource: Resource[SyncIO, ExecutionContext] = {

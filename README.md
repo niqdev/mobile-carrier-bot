@@ -16,8 +16,7 @@ http :8080/config
 > TODO
 
 ```
-ENVIRONMENT=dev sbt app/run
-
+sbt app/run
 sbt test
 ```
 

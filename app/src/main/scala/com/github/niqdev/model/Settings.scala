@@ -12,23 +12,23 @@ import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.EntityEncoder
 import org.http4s.circe.jsonEncoderOf
 
-final case class Configurations(environment: NonEmptyString,
-                                httpPort: PosInt,
-                                httpHost: NonEmptyString,
-                                telegramApiToken: NonEmptyString)
+final case class Settings(environment: NonEmptyString,
+                          httpPort: PosInt,
+                          httpHost: NonEmptyString,
+                          telegramApiToken: NonEmptyString)
 
-sealed trait ConfigurationsInstances {
+sealed trait SettingsInstances {
 
   import io.circe.refined.refinedEncoder
 
-  implicit val configurationsEncoder: Encoder[Configurations] =
-    deriveEncoder[Configurations]
+  implicit val settingsEncoder: Encoder[Settings] =
+    deriveEncoder[Settings]
 
-  implicit def configurationsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Configurations] =
-    jsonEncoderOf[F, Configurations]
+  implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Settings] =
+    jsonEncoderOf[F, Settings]
 
-  implicit val settingsShow: Show[Configurations] =
-    (settings: Configurations) => s"""
+  implicit val settingsShow: Show[Settings] =
+    (settings: Settings) => s"""
          |ENVIRONMENT=${settings.environment}
          |HTTP_PORT=${settings.httpPort}
          |HTTP_HOST=${settings.httpHost}
@@ -37,7 +37,7 @@ sealed trait ConfigurationsInstances {
 
 }
 
-object Configurations extends ConfigurationsInstances {
+object Settings extends SettingsInstances {
 
   import eu.timepit.refined.auto.autoRefineV
 
@@ -46,7 +46,7 @@ object Configurations extends ConfigurationsInstances {
   private[this] val defaultHost: NonEmptyString             = "localhost"
   private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
 
-  def load[F[_]: Sync]: F[Configurations] =
+  def load[F[_]: Sync]: F[Settings] =
     loadConfig(
       envF[F, NonEmptyString]("ENVIRONMENT")
         .orValue(defaultEnvironment),
@@ -56,12 +56,12 @@ object Configurations extends ConfigurationsInstances {
         .orValue(defaultHost),
       envF[F, NonEmptyString]("TELEGRAM_API_TOKEN")
         .orValue(defaultTelegramApiToken)
-    )(Configurations.apply).orRaiseThrowable
+    )(Settings.apply).orRaiseThrowable
 
-  def obfuscate(configurations: Configurations): Configurations =
-    if (configurations.environment != defaultEnvironment)
-      configurations.copy(telegramApiToken = defaultTelegramApiToken)
+  def obfuscate(settings: Settings): Settings =
+    if (settings.environment != defaultEnvironment)
+      settings.copy(telegramApiToken = defaultTelegramApiToken)
     else
-      configurations
+      settings
 
 }
