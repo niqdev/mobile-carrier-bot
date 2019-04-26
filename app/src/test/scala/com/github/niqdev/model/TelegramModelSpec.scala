@@ -1,23 +1,57 @@
 package com.github.niqdev
 package model
 
+import io.circe.Json
 import io.circe.parser.parse
-import io.circe.{ Decoder, DecodingFailure, Json }
 import org.scalatest.{ Matchers, WordSpecLike }
 
-// TODO refined + enumeratum (check Long)
-// TODO filter is_bot
-final case class Chat(id: Long, firstName: String, language: String)
-// TODO message_id, date and update_id + make fields optional
-// TODO strict only on required fields, ignore everything else
-// https://core.telegram.org/bots/api#message
-final case class Message(chat: Chat, text: String)
+final class TelegramModelSpec extends WordSpecLike with Matchers {
 
-final class JsonSpec extends WordSpecLike with Matchers {
+  "TelegramModel" must {
 
-  implicit val chatDecoder: Decoder[Chat] =
-    Decoder.forProduct3("id", "first_name", "language_code")(Chat.apply)
+    "parse User json with defaults" in {
+      val json: Json = parse("""
+          |{
+          |  "id": 123456789,
+          |  "is_bot": false,
+          |  "first_name": "MyFirstName"
+          |}
+        """.stripMargin).getOrElse(Json.Null)
 
+      val expectedUser = User(
+        id = 123456789,
+        firstName = "MyFirstName"
+      )
+
+      json.as[User] shouldBe Right(expectedUser)
+    }
+
+    "parse User json" in {
+      val json: Json = parse("""
+          |{
+          |  "id": 123456789,
+          |  "is_bot": true,
+          |  "first_name": "MyFirstName",
+          |  "last_name": "MyLastName",
+          |  "username": "MyUsername",
+          |  "language_code": "en"
+          |}
+        """.stripMargin).getOrElse(Json.Null)
+
+      val expectedUser = User(
+        id = 123456789,
+        isBot = true,
+        firstName = "MyFirstName",
+        lastName = Some("MyLastName"),
+        username = Some("MyUsername"),
+        languageCode = Some("en")
+      )
+
+      json.as[User] shouldBe Right(expectedUser)
+    }
+  }
+
+  /*
   private[this] def result(json: Json): Vector[Json] =
     json.hcursor
       .downField("result")
@@ -148,5 +182,6 @@ final class JsonSpec extends WordSpecLike with Matchers {
       result(json) shouldBe Vector.empty[Json]
     }
   }
+ */
 
 }
