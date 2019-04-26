@@ -1,8 +1,9 @@
 package com.github.niqdev
 package model
 
+import com.github.ghik.silencer.silent
 import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{Decoder, HCursor}
+import io.circe.{ Decoder, HCursor }
 
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
@@ -52,18 +53,19 @@ final case class Message(
   id: Long,
   from: Option[User] = None,
   date: Long,
-  text: Option[String] = None,
+  text: Option[String] = None
 )
 
 object Message {
 
   implicit val messageDecoder: Decoder[Message] =
-    (c: HCursor) => for {
-      id <- c.downField("message_id").as[Long]
-      from <- c.downField("from").as[Option[User]]
-      date <- c.downField("date").as[Long]
-      text <- c.downField("text").as[Option[String]]
-    } yield Message(id, from, date, text)
+    (c: HCursor) =>
+      for {
+        id <- c.downField("message_id").as[Long]
+        from <- c.downField("from").as[Option[User]]
+        date <- c.downField("date").as[Long]
+        text <- c.downField("text").as[Option[String]]
+      } yield Message(id, from, date, text)
 }
 
 /**
@@ -72,7 +74,7 @@ object Message {
   * @param id The update‘s unique identifier
   * @param message Optional. New incoming message of any kind — text, photo, sticker, etc.
   */
-final case class Update(id: Long, message: Message)
+final case class Update(id: Long, message: Option[Message])
 
 object Update {
 
@@ -113,6 +115,7 @@ final case class Response[T](
 
 object Response {
 
-  implicit val updateResponseDecoder: Decoder[Response[Vector[Update]]] =
-    deriveDecoder[Response[Vector[Update]]]
+  @silent
+  implicit def responseDecoder[T](implicit D: Decoder[T]): Decoder[Response[T]] =
+    deriveDecoder[Response[T]]
 }
