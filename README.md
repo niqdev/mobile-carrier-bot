@@ -17,7 +17,7 @@ http :8080/config
 
 ```
 sbt app/run
-sbt test
+sbt test -jvm-debug 5005
 ```
 
 ### sbt aliases
