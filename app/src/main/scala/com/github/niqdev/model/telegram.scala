@@ -1,7 +1,7 @@
 package com.github.niqdev
 package model
 
-import io.circe.Decoder
+import io.circe.{Decoder, HCursor}
 
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
@@ -38,7 +38,7 @@ object User {
 }
 
 // TODO refined + date
-// TODO validation: ignore if user or text is None
+// TODO validation: ignore if user or text is None, dedup
 /**
   * [[https://core.telegram.org/bots/api#message Message]]
   *
@@ -52,4 +52,60 @@ final case class Message(
   from: Option[User],
   date: Long,
   text: Option[String]
+)
+
+object Message {
+
+  implicit val messageDecoder: Decoder[Message] =
+    (c: HCursor) => for {
+      id <- c.downField("message_id").as[Long]
+      from <- c.downField("from").as[Option[User]]
+      date <- c.downField("date").as[Long]
+      text <- c.downField("text").as[Option[String]]
+    } yield Message(id, from, date, text)
+}
+
+/**
+  * [[https://core.telegram.org/bots/api#update Update]]
+  *
+  * @param id The update‘s unique identifier
+  * @param message Optional. New incoming message of any kind — text, photo, sticker, etc.
+  */
+final case class Update(id: Long, message: Message)
+
+object Update {
+
+  implicit val updateDecoder: Decoder[Update] =
+    Decoder.forProduct2(
+      "update_id",
+      "message")(Update.apply)
+}
+
+/**
+  * [[https://core.telegram.org/bots/api#responseparameters ResponseParameters]]
+  *
+  * Contains information about why a request was unsuccessful.
+  */
+final case class ResponseParameters(
+  migrateToChatId: Long,
+  retryAfter: Long
+)
+
+object ResponseParameters {
+
+  implicit val responseParametersDecoder: Decoder[ResponseParameters] =
+    Decoder.forProduct2(
+      "migrate_to_chat_id",
+      "retry_after")(ResponseParameters.apply)
+}
+
+/**
+  * [[https://core.telegram.org/bots/api#making-requests Response]]
+  */
+final case class UpdateResponse[T](
+  ok: Boolean,
+  description: Option[String],
+  result: Option[T],
+  errorCode: Option[Long],
+  parameters: Option[ResponseParameters]
 )
