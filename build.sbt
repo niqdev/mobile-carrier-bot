@@ -3,6 +3,7 @@ import Dependencies.{ appDependencies, coreDependencies, sharedDependencies, tes
 lazy val I = new {
   val organization = "com.github.niqdev"
   val name         = "mobile-carrier-bot"
+  val scalaVersion = "2.12.8"
   // TODO sbt-dynver
   val version = "0.1"
 }
@@ -39,7 +40,7 @@ lazy val root = project
     inThisBuild(
       List(
         organization := I.organization,
-        scalaVersion := "2.12.8",
+        scalaVersion := I.scalaVersion,
         version      := I.version
       )
     ),
