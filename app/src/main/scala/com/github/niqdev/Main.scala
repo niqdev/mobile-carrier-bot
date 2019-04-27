@@ -19,8 +19,6 @@ import scala.concurrent.ExecutionContext
 
 object Main extends IOApp.WithContext {
 
-  Stream.
-
   import scala.concurrent.duration.DurationInt
 
   def myStream[F[_]: Sync: Timer] =
@@ -28,7 +26,8 @@ object Main extends IOApp.WithContext {
       .eval(Sync[F].delay {
         println("streammmmm")
       })
-      .flatMap(_ => Stream.sleep(2.seconds))
+      //.flatMap(_ => Stream.sleep(2.seconds))
+      .flatMap(_ => Stream.eval(Timer[F].sleep(2.seconds)))
       .repeat
       .compile.drain
 
@@ -59,12 +58,5 @@ object Main extends IOApp.WithContext {
 
   override def run(args: List[String]): IO[ExitCode] =
     //start[IO].use(_ => IO.never).as(ExitCode.Success)
-    (for {
-      log <- Resource.liftF(Slf4jLogger.create[IO])
-      settings <- Resource.liftF(Settings.load[IO])
-      _ <- Resource.liftF(log.debug(s"Settings: ${settings.show}"))
-      //client <- Http[IO].client(executionContext)
-      //_ <- Resource.liftF(TelegramService.apply.poll(client, settings, executionContext))
-      _ <- Resource.liftF(myStream[IO])
-    } yield ()).use(_ => IO.never).as(ExitCode.Success)
+    myStream[IO].as(ExitCode.Success)
 }
