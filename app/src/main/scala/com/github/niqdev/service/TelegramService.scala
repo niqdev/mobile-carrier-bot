@@ -1,19 +1,30 @@
 package com.github.niqdev.service
 
-import cats.effect.{ ContextShift, IO, Timer }
-import org.http4s.client.blaze.BlazeClientBuilder
+import java.util.concurrent.TimeUnit
+
+import cats.effect.{IO, Sync}
+import com.github.niqdev.model.Settings
+import org.http4s.client.Client
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
+
+sealed abstract class TelegramService {
+
+  def poll[F[_]: Sync](httpClient: Client[F], settings: Settings, ec: ExecutionContext): IO[Unit] =
+    IO.timer(ec)
+      .sleep(FiniteDuration(settings.telegramPolling, TimeUnit.SECONDS))
+      .flatMap { _ =>
+        IO.delay {
+          println("Hello!")
+        }
+      }
+      .flatMap(_ => poll(httpClient, settings, ec))
+}
 
 object TelegramService {
 
-  import scala.concurrent.ExecutionContext.global
-
-  implicit val cs: ContextShift[IO] = IO.contextShift(global)
-  implicit val timer: Timer[IO]     = IO.timer(global)
-
-  def updates: IO[String] =
-    BlazeClientBuilder[IO](global).resource.use { client =>
-      val target = "https://http4s.org/v0.18/client/"
-      client.expect[String](target)
-    }
+  def apply: TelegramService =
+    new TelegramService {}
 
 }

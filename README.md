@@ -16,8 +16,16 @@ http :8080/config
 > TODO
 
 ```
-sbt app/run
+# test
 sbt test -jvm-debug 5005
+
+# run with default
+sbt app/run
+
+# run
+ENVIRONMENT=local \
+TELEGRAM_API_TOKEN=123:xyz \
+sbt app/run
 ```
 
 ### sbt aliases
