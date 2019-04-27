@@ -1,6 +1,6 @@
 package com.github.niqdev
 
-import java.util.concurrent.{ExecutorService, Executors, TimeUnit}
+import java.util.concurrent.{ ExecutorService, Executors, TimeUnit }
 
 import cats.effect._
 import cats.implicits.toFunctorOps
@@ -13,7 +13,7 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
 import org.http4s.server.Server
 //import cats.implicits.catsSyntaxApply
-import cats.effect.{IO, Timer}
+import cats.effect.{ IO, Timer }
 
 import scala.concurrent.ExecutionContext
 

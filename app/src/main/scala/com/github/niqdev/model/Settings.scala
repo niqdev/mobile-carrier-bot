@@ -1,10 +1,10 @@
 package com.github.niqdev.model
 
 import cats.effect.Sync
-import cats.{Applicative, Show}
+import cats.{ Applicative, Show }
 import ciris.cats.catsMonadErrorToCiris
 import ciris.refined.refTypeConfigDecoder
-import ciris.{envF, loadConfig}
+import ciris.{ envF, loadConfig }
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
@@ -26,12 +26,11 @@ sealed trait SettingsInstances {
   implicit val settingsEncoder: Encoder[Settings] =
     deriveEncoder[Settings]
 
-  implicit def settingsEntityEncoder[F[_] : Applicative]: EntityEncoder[F, Settings] =
+  implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Settings] =
     jsonEncoderOf[F, Settings]
 
   implicit val settingsShow: Show[Settings] =
-    (settings: Settings) =>
-      s"""
+    (settings: Settings) => s"""
          |ENVIRONMENT=${settings.environment}
          |HTTP_PORT=${settings.httpPort}
          |HTTP_HOST=${settings.httpHost}
@@ -47,13 +46,13 @@ object Settings extends SettingsInstances {
 
   //import scala.concurrent.duration.DurationInt
 
-  private[this] val defaultEnvironment: NonEmptyString = "dev"
-  private[this] val defaultPort: PosInt = 8080
-  private[this] val defaultHost: NonEmptyString = "localhost"
+  private[this] val defaultEnvironment: NonEmptyString      = "dev"
+  private[this] val defaultPort: PosInt                     = 8080
+  private[this] val defaultHost: NonEmptyString             = "localhost"
   private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
-  private[this] val defaultTelegramPolling: Long = 2
+  private[this] val defaultTelegramPolling: Long            = 2
 
-  def load[F[_] : Sync]: F[Settings] =
+  def load[F[_]: Sync]: F[Settings] =
     loadConfig(
       envF[F, NonEmptyString]("ENVIRONMENT")
         .orValue(defaultEnvironment),
@@ -64,7 +63,7 @@ object Settings extends SettingsInstances {
       envF[F, NonEmptyString]("TELEGRAM_API_TOKEN")
         .orValue(defaultTelegramApiToken),
       envF[F, Long]("TELEGRAM_POLLING")
-        .orValue(defaultTelegramPolling),
+        .orValue(defaultTelegramPolling)
     )(Settings.apply).orRaiseThrowable
 
   def obfuscate(settings: Settings): Settings =

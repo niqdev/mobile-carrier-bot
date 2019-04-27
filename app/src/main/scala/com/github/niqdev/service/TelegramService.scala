@@ -2,7 +2,7 @@ package com.github.niqdev.service
 
 import java.util.concurrent.TimeUnit
 
-import cats.effect.{IO, Sync}
+import cats.effect.{ IO, Sync }
 import com.github.niqdev.model.Settings
 import org.http4s.client.Client
 

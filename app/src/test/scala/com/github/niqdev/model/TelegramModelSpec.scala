@@ -10,8 +10,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
   "TelegramModel" must {
 
     "parse json User with defaults" in {
-      val json: Json = parse(
-        """
+      val json: Json = parse("""
           |{
           |  "id": 123456789,
           |  "is_bot": false,
@@ -29,8 +28,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
     }
 
     "parse json User" in {
-      val json: Json = parse(
-        """
+      val json: Json = parse("""
           |{
           |  "id": 123456789,
           |  "is_bot": true,
@@ -63,8 +61,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
         firstName = "MyFirstName"
       )
 
-      val json = parse(
-        s"""
+      val json = parse(s"""
            |{
            |  "chat": {
            |    "first_name": "MyFirstName",
@@ -100,8 +97,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
     }
 
     "parse json Response and ignore invalid messages" in {
-      val json: Json = parse(
-        """
+      val json: Json = parse("""
           |{
           |  "ok": true,
           |  "result": [
