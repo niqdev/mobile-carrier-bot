@@ -82,8 +82,7 @@ final class TelegramModelSpec extends WordSpecLike with Matchers {
            |  "from": {
            |    "first_name": "${user.firstName}",
            |    "id": ${user.id},
-           |    "is_bot": ${user.isBot},
-           |    "language_code": "${user.languageCode}"
+           |    "is_bot": ${user.isBot}
            |  },
            |  "message_id": $messageId,
            |  "text": "$text"
