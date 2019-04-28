@@ -3,28 +3,27 @@ package com.github.niqdev
 import java.util.concurrent.{ ExecutorService, Executors, TimeUnit }
 
 import cats.effect.{ ExitCode, IO, IOApp, Sync, Timer, _ }
-import cats.implicits.catsSyntaxApply
+import cats.implicits.{ catsSyntaxApply, toFlatMapOps, toFunctorOps }
 import cats.syntax.show.toShow
-import com.github.niqdev.http.HttpServer
+import com.github.niqdev.http.{ HttpServer, TelegramClient }
 import com.github.niqdev.model.Settings
-import com.github.niqdev.service.TelegramService
-import fs2.Stream
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.http4s.client.blaze.BlazeClientBuilder
 
 import scala.concurrent.ExecutionContext
 
 object Main extends IOApp.WithContext {
 
   def start[F[_]: ConcurrentEffect: Timer](log: Logger[F]): F[Unit] =
-    (for {
-      settings <- Stream.eval(Settings.load[F])
-      client   <- BlazeClientBuilder[F](executionContext).stream
-      _        <- Stream.eval(log.debug(s"Settings: ${settings.show}"))
-      server   <- HttpServer[F].start(settings)
-      _        <- TelegramService[F].pollingGetUpdates(client, settings)
-    } yield server).compile.drain
+    for {
+      settings <- Settings.load[F]
+      _        <- log.debug(s"Settings: ${settings.show}")
+      _ <- HttpServer[F]
+        .start(settings)
+        .merge(TelegramClient[F].startPolling(settings.telegram, executionContext))
+        .compile
+        .drain
+    } yield ()
 
   private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
     log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
