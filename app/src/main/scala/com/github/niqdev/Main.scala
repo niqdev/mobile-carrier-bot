@@ -1,46 +1,44 @@
 package com.github.niqdev
 
-import java.util.concurrent.{ ExecutorService, Executors, TimeUnit }
+import java.util.concurrent.{ExecutorService, Executors, TimeUnit}
 
-import cats.effect._
-import cats.implicits.toFunctorOps
+import cats.effect.{ExitCode, IO, IOApp, Sync, Timer, _}
+import cats.implicits.catsSyntaxApply
 import cats.syntax.show.toShow
-import com.github.ghik.silencer.silent
-import com.github.niqdev.http.Http
+import com.github.niqdev.http.HttpServer
 import com.github.niqdev.model.Settings
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.http4s.client.Client
-import org.http4s.server.Server
-//import cats.implicits.catsSyntaxApply
-import cats.effect.{ IO, Timer }
+import com.github.niqdev.service.TelegramService
 import fs2.Stream
+import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.http4s.client.blaze.BlazeClientBuilder
 
 import scala.concurrent.ExecutionContext
 
 object Main extends IOApp.WithContext {
 
-  import scala.concurrent.duration.DurationInt
+  def start[F[_]: ConcurrentEffect: Timer](log: Logger[F]): F[Unit] =
+    (for {
+      settings <- Stream.eval(Settings.load[F])
+      client <- BlazeClientBuilder[F](executionContext).stream
+      _ <- Stream.eval(log.debug(s"Settings: ${settings.show}"))
+      server <- HttpServer[F].start(settings)
+      _ <- TelegramService[F].pollingGetUpdates(client, settings)
+    } yield server).compile.drain
 
-  def myStream[F[_]: Sync: Timer] =
-    Stream
-      .eval(Sync[F].delay {
-        println("streammmmm")
-      })
-      //.flatMap(_ => Stream.sleep(2.seconds))
-      .flatMap(_ => Stream.eval(Timer[F].sleep(2.seconds)))
-      .repeat
-      .compile.drain
 
-  @silent
-  def start[F[_]: ConcurrentEffect: Timer]: Resource[F, (Client[F], Server[F])] =
-    for {
-      log <- Resource.liftF(Slf4jLogger.create[F])
-      settings <- Resource.liftF(Settings.load[F])
-      _ <- Resource.liftF(log.debug(s"Settings: ${settings.show}"))
-      client <- Http[F].client(executionContext)
-      server <- Http[F].server(settings)
-      _ <- Resource.liftF(myStream)
-    } yield (client, server)
+  private[this] def error[F[_] : Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
+    log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
+
+  private[this] def success[F[_] : Sync]: Unit => F[ExitCode] =
+    _ => Sync[F].pure(ExitCode.Success)
+
+  /**
+    *
+    */
+  override def run(args: List[String]): IO[ExitCode] =
+    Slf4jLogger.create[IO]
+      .flatMap(log => start[IO](log).redeemWith(error[IO](log), success[IO]))
 
   override protected def executionContextResource: Resource[SyncIO, ExecutionContext] = {
     val acquire = SyncIO(Executors.newCachedThreadPool())
@@ -56,7 +54,4 @@ object Main extends IOApp.WithContext {
       .map(ExecutionContext.fromExecutorService)
   }
 
-  override def run(args: List[String]): IO[ExitCode] =
-    //start[IO].use(_ => IO.never).as(ExitCode.Success)
-    myStream[IO].as(ExitCode.Success)
 }

@@ -8,7 +8,7 @@ A bot to access mobile carrier services implemented in Scala using Tagless Final
 # healt checks
 http :8080/status
 http :8080/info
-http :8080/config
+http :8080/env
 ```
 
 ## Development

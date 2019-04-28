@@ -50,7 +50,7 @@ object Settings extends SettingsInstances {
   private[this] val defaultPort: PosInt                     = 8080
   private[this] val defaultHost: NonEmptyString             = "localhost"
   private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
-  private[this] val defaultTelegramPolling: Long            = 2
+  private[this] val defaultTelegramPolling: Long            = 5
 
   def load[F[_]: Sync]: F[Settings] =
     loadConfig(

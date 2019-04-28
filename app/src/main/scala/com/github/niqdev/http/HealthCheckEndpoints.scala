@@ -22,16 +22,16 @@ sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Http4sDsl[F] {
         Ok(service.buildInformation)
     }
 
-  private[http] def configEndpoint(settings: Settings): HttpRoutes[F] =
+  private[http] def envEndpoint(settings: Settings): HttpRoutes[F] =
     HttpRoutes.of[F] {
-      case Method.GET -> Root / "config" =>
+      case Method.GET -> Root / "env" =>
         Ok(Settings.obfuscate(settings))
     }
 
   def endpoints(service: HealthCheckService[F], settings: Settings): HttpRoutes[F] =
     statusEndpoint <+>
       infoEndpoint(service) <+>
-      configEndpoint(settings)
+      envEndpoint(settings)
 }
 
 object HealthCheckEndpoints {
