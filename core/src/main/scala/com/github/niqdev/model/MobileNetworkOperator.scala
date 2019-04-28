@@ -27,8 +27,16 @@ object MobileNetworkOperator extends Enum[MobileNetworkOperator] {
   val values = findValues
 
   case object ThreeIe
-      extends MobileNetworkOperator(countryCallingCode = 353, website = "https://www.three.ie")
-  case object TimIt extends MobileNetworkOperator(countryCallingCode = 39, website = "https://www.tim.it")
+      extends MobileNetworkOperator(
+        countryCallingCode = 353,
+        website = "https://www.three.ie"
+      )
+
+  case object TimIt
+      extends MobileNetworkOperator(
+        countryCallingCode = 39,
+        website = "https://www.tim.it"
+      )
 
   final type ThreeIe = ThreeIe.type
   final type TimIt   = TimIt.type

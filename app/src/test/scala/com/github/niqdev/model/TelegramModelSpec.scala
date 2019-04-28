@@ -3,9 +3,8 @@ package model
 
 import io.circe.Json
 import io.circe.parser.parse
-import org.scalatest.{ Matchers, WordSpecLike }
 
-final class TelegramModelSpec extends WordSpecLike with Matchers {
+final class TelegramModelSpec extends BaseSpec {
 
   "TelegramModel" must {
 

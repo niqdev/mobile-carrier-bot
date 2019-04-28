@@ -41,6 +41,7 @@ object Dependencies {
     "is.cir"     %% "ciris-core"          % V.ciris,
     "is.cir"     %% "ciris-cats"          % V.ciris,
     "is.cir"     %% "ciris-refined"       % V.ciris,
+    "is.cir"     %% "ciris-enumeratum"    % V.ciris,
     "org.http4s" %% "http4s-dsl"          % V.http4s,
     "org.http4s" %% "http4s-blaze-server" % V.http4s,
     "org.http4s" %% "http4s-blaze-client" % V.http4s,

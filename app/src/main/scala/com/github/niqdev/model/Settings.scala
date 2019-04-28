@@ -12,7 +12,7 @@ import org.http4s.EntityEncoder
 import org.http4s.circe.jsonEncoderOf
 
 final case class Settings(
-  environment: NonEmptyString,
+  environment: Environment,
   server: ServerSettings,
   telegram: TelegramSettings
 )
@@ -40,7 +40,7 @@ sealed trait SettingsInstances {
   implicit val settingsShow: Show[Settings] =
     (settings: Settings) => s"""
          |# global settings
-         |ENVIRONMENT=${settings.environment}
+         |ENVIRONMENT=${settings.environment.entryName}
          |# server settings
          |HTTP_PORT=${settings.server.port}
          |HTTP_HOST=${settings.server.host}
@@ -53,17 +53,16 @@ sealed trait SettingsInstances {
 object Settings extends SettingsInstances {
 
   import eu.timepit.refined.auto.autoRefineV
-  //import scala.concurrent.duration.DurationInt
+  import ciris.enumeratum.enumEntryConfigDecoder
 
-  // TODO enumeratum env
-  private[this] val defaultEnvironment: NonEmptyString      = "local"
+  private[this] val defaultEnvironment: Environment         = Environment.Local
   private[this] val defaultPort: PortNumber                 = 8080
   private[this] val defaultHost: NonEmptyString             = "localhost"
   private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
   private[this] val defaultTelegramPolling: PosLong         = 5L
 
   def apply(
-    environment: NonEmptyString,
+    environment: Environment,
     httpPort: PortNumber,
     httpHost: NonEmptyString,
     telegramApiToken: NonEmptyString,
@@ -77,7 +76,7 @@ object Settings extends SettingsInstances {
 
   def load[F[_]: Sync]: F[Settings] =
     loadConfig(
-      envF[F, NonEmptyString]("ENVIRONMENT")
+      envF[F, Environment]("ENVIRONMENT")
         .orValue(defaultEnvironment),
       envF[F, PortNumber]("HTTP_PORT")
         .orValue(defaultPort),
@@ -88,12 +87,4 @@ object Settings extends SettingsInstances {
       envF[F, PosLong]("TELEGRAM_POLLING")
         .orValue(defaultTelegramPolling)
     )(Settings.apply).orRaiseThrowable
-
-  // TODO lenses
-  def obfuscate(settings: Settings): Settings =
-    if (settings.environment != defaultEnvironment)
-      //settings.copy(telegramApiToken = defaultTelegramApiToken)
-      settings
-    else
-      settings
 }

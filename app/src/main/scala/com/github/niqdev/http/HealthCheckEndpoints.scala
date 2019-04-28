@@ -3,7 +3,7 @@ package http
 
 import cats.effect.Sync
 import cats.implicits.toSemigroupKOps
-import com.github.niqdev.model.Settings
+import com.github.niqdev.model.{ Environment, Settings }
 import com.github.niqdev.service.HealthCheckService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{ HttpRoutes, Method }
@@ -13,7 +13,7 @@ private[http] sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Htt
   def statusEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root / "status" =>
-        Ok("OK")
+        Ok(Ok.reason)
     }
 
   def infoEndpoint(service: HealthCheckService): HttpRoutes[F] =
@@ -25,7 +25,12 @@ private[http] sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Htt
   def envEndpoint(settings: Settings): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root / "env" =>
-        Ok(Settings.obfuscate(settings))
+        settings.environment match {
+          case Environment.Local =>
+            Ok(settings)
+          case _ =>
+            NotFound(NotFound.reason)
+        }
     }
 
   def endpoints(service: HealthCheckService, settings: Settings): HttpRoutes[F] =
