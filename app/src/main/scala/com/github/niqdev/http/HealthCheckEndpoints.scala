@@ -8,37 +8,34 @@ import com.github.niqdev.service.HealthCheckService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{ HttpRoutes, Method }
 
-sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Http4sDsl[F] {
+private[http] sealed abstract class HealthCheckEndpoints[F[_]: Sync] extends Http4sDsl[F] {
 
-  private[http] def statusEndpoint: HttpRoutes[F] =
+  def statusEndpoint: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root / "status" =>
         Ok("OK")
     }
 
-  private[http] def infoEndpoint(service: HealthCheckService[F]): HttpRoutes[F] =
+  def infoEndpoint(service: HealthCheckService): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root / "info" =>
-        Ok(service.buildInformation)
+        Ok(service.buildInformation[F])
     }
 
-  private[http] def envEndpoint(settings: Settings): HttpRoutes[F] =
+  def envEndpoint(settings: Settings): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root / "env" =>
         Ok(Settings.obfuscate(settings))
     }
 
-  def endpoints(service: HealthCheckService[F], settings: Settings): HttpRoutes[F] =
+  def endpoints(service: HealthCheckService, settings: Settings): HttpRoutes[F] =
     statusEndpoint <+>
       infoEndpoint(service) <+>
       envEndpoint(settings)
 }
 
-object HealthCheckEndpoints {
+private[http] object HealthCheckEndpoints {
 
   def apply[F[_]: Sync]: HealthCheckEndpoints[F] =
     new HealthCheckEndpoints[F] {}
-
-  def endpoints[F[_]: Sync](service: HealthCheckService[F], settings: Settings): HttpRoutes[F] =
-    HealthCheckEndpoints[F].endpoints(service, settings)
 }

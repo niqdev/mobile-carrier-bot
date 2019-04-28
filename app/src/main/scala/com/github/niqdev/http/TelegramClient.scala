@@ -12,10 +12,6 @@ import scala.concurrent.duration.DurationLong
 
 sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer] {
 
-  //import org.http4s.Http4sLiteralSyntax
-  //  def buildUri(settings: Settings, method: String): Uri =
-  //    uri"https://api.telegram.org/bot${settings.telegramApiToken}".withPath(s"/$method")
-
   private[http] def httpClient(executionContext: ExecutionContext): Stream[F, Client[F]] =
     BlazeClientBuilder[F](executionContext).stream
 

@@ -4,9 +4,9 @@ package service
 import cats.effect.Sync
 import com.github.niqdev.model.BuildInformation
 
-sealed abstract class HealthCheckService[F[_]: Sync] {
+sealed abstract class HealthCheckService {
 
-  def buildInformation: F[BuildInformation] =
+  def buildInformation[F[_]: Sync]: F[BuildInformation] =
     Sync[F].pure {
       BuildInformation(
         BuildInfo.name,
@@ -18,7 +18,6 @@ sealed abstract class HealthCheckService[F[_]: Sync] {
 }
 
 object HealthCheckService {
-
-  def apply[F[_]: Sync](): HealthCheckService[F] =
-    new HealthCheckService[F] {}
+  def apply(): HealthCheckService =
+    new HealthCheckService {}
 }
