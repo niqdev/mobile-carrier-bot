@@ -20,7 +20,7 @@ lazy val app = (project in file("app"))
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoSettings)
   .settings(
-    resolvers += Resolver.sonatypeRepo("snapshots"),
+    //resolvers += Resolver.sonatypeRepo("snapshots"),
     libraryDependencies ++= (appDependencies ++ sharedDependencies ++ testDependencies)
       .map(_.withSources)
       .map(_.withJavadoc)

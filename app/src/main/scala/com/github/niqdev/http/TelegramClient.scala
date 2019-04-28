@@ -2,7 +2,7 @@ package com.github.niqdev
 package http
 
 import cats.effect._
-import com.github.niqdev.model.TelegramSettings
+import com.github.niqdev.model.{Response, TelegramSettings, Update}
 import fs2.Stream
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -18,7 +18,9 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer] {
   private[http] def getUpdates(client: Client[F], settings: TelegramSettings): Stream[F, Unit] =
     Stream
       .awakeEvery[F](settings.polling.value.seconds)
-      .flatMap(_ => Stream.eval(client.expect[String](s"${settings.uri}/getMe")))
+      .flatMap(_ => Stream.eval {
+        client.expect[Response[Vector[Update]]](s"${settings.uri}/getUpdates")
+      })
       .flatMap(response => Stream.eval(Sync[F].delay(println(response))))
 
   def startPolling(settings: TelegramSettings, executionContext: ExecutionContext): Stream[F, Unit] =

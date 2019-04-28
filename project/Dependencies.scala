@@ -14,7 +14,7 @@ object Dependencies {
 
     // app
     val ciris  = "0.12.1"
-    val http4s = "0.20.0-SNAPSHOT"
+    val http4s = "0.20.0"
     val circe  = "0.11.1"
     val fs2    = "1.0.4"
 

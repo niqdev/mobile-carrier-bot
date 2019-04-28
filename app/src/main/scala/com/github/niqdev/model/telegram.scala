@@ -1,9 +1,11 @@
 package com.github.niqdev
 package model
 
-import com.github.ghik.silencer.silent
+import cats.effect.Sync
 import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{ Decoder, HCursor }
+import io.circe.{Decoder, HCursor}
+import org.http4s.EntityDecoder
+import org.http4s.circe.jsonOf
 
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
@@ -115,7 +117,9 @@ final case class Response[T](
 
 object Response {
 
-  @silent
-  implicit def responseDecoder[T](implicit D: Decoder[T]): Decoder[Response[T]] =
+  implicit def responseDecoder[T: Decoder]: Decoder[Response[T]] =
     deriveDecoder[Response[T]]
+
+  implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Vector[Update]]] =
+    jsonOf[F, Response[Vector[Update]]]
 }
