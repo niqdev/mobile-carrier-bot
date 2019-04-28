@@ -2,14 +2,14 @@ package com.github.niqdev
 package http
 
 import cats.data.Kleisli
-import cats.effect.{ConcurrentEffect, Timer}
+import cats.effect.{ ConcurrentEffect, Timer }
 import com.github.niqdev.model.Settings
 import com.github.niqdev.service.HealthCheckService
 import fs2.Stream
 import org.http4s.server.Server
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli.http4sKleisliResponseSyntax
-import org.http4s.{Request, Response}
+import org.http4s.{ Request, Response }
 
 sealed abstract class HttpServer[F[_]](implicit E: ConcurrentEffect[F], T: Timer[F]) {
 

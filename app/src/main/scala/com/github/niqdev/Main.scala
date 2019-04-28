@@ -1,8 +1,8 @@
 package com.github.niqdev
 
-import java.util.concurrent.{ExecutorService, Executors, TimeUnit}
+import java.util.concurrent.{ ExecutorService, Executors, TimeUnit }
 
-import cats.effect.{ExitCode, IO, IOApp, Sync, Timer, _}
+import cats.effect.{ ExitCode, IO, IOApp, Sync, Timer, _ }
 import cats.implicits.catsSyntaxApply
 import cats.syntax.show.toShow
 import com.github.niqdev.http.HttpServer
@@ -20,24 +20,24 @@ object Main extends IOApp.WithContext {
   def start[F[_]: ConcurrentEffect: Timer](log: Logger[F]): F[Unit] =
     (for {
       settings <- Stream.eval(Settings.load[F])
-      client <- BlazeClientBuilder[F](executionContext).stream
-      _ <- Stream.eval(log.debug(s"Settings: ${settings.show}"))
-      server <- HttpServer[F].start(settings)
-      _ <- TelegramService[F].pollingGetUpdates(client, settings)
+      client   <- BlazeClientBuilder[F](executionContext).stream
+      _        <- Stream.eval(log.debug(s"Settings: ${settings.show}"))
+      server   <- HttpServer[F].start(settings)
+      _        <- TelegramService[F].pollingGetUpdates(client, settings)
     } yield server).compile.drain
 
-
-  private[this] def error[F[_] : Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
+  private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
     log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
 
-  private[this] def success[F[_] : Sync]: Unit => F[ExitCode] =
+  private[this] def success[F[_]: Sync]: Unit => F[ExitCode] =
     _ => Sync[F].pure(ExitCode.Success)
 
   /**
     *
     */
   override def run(args: List[String]): IO[ExitCode] =
-    Slf4jLogger.create[IO]
+    Slf4jLogger
+      .create[IO]
       .flatMap(log => start[IO](log).redeemWith(error[IO](log), success[IO]))
 
   override protected def executionContextResource: Resource[SyncIO, ExecutionContext] = {

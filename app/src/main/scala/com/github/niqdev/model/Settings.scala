@@ -12,12 +12,14 @@ import io.circe.generic.semiauto.deriveEncoder
 import org.http4s.EntityEncoder
 import org.http4s.circe.jsonEncoderOf
 
-final case class Settings(environment: NonEmptyString,
-                          httpPort: PosInt,
-                          httpHost: NonEmptyString,
-                          telegramApiToken: NonEmptyString,
-                          // TODO FiniteDuration
-                          telegramPolling: Long)
+final case class Settings(
+  environment: NonEmptyString,
+  httpPort: PosInt,
+  httpHost: NonEmptyString,
+  telegramApiToken: NonEmptyString,
+  // TODO FiniteDuration
+  telegramPolling: Long
+)
 
 sealed trait SettingsInstances {
 
@@ -37,13 +39,11 @@ sealed trait SettingsInstances {
          |TELEGRAM_API_TOKEN=${settings.telegramApiToken}
          |TELEGRAM_POLLING=${settings.telegramPolling}
        """.stripMargin
-
 }
 
 object Settings extends SettingsInstances {
 
   import eu.timepit.refined.auto.autoRefineV
-
   //import scala.concurrent.duration.DurationInt
 
   private[this] val defaultEnvironment: NonEmptyString      = "dev"
@@ -71,5 +71,4 @@ object Settings extends SettingsInstances {
       settings.copy(telegramApiToken = defaultTelegramApiToken)
     else
       settings
-
 }

@@ -61,7 +61,7 @@ object Message {
   implicit val messageDecoder: Decoder[Message] =
     (c: HCursor) =>
       for {
-        id <- c.downField("message_id").as[Long]
+        id   <- c.downField("message_id").as[Long]
         from <- c.downField("from").as[Option[User]]
         date <- c.downField("date").as[Long]
         text <- c.downField("text").as[Option[String]]

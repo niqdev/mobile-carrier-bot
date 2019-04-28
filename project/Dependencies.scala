@@ -16,7 +16,7 @@ object Dependencies {
     val ciris  = "0.12.1"
     val http4s = "0.20.0-SNAPSHOT"
     val circe  = "0.11.1"
-    val fs2 = "1.0.4"
+    val fs2    = "1.0.4"
 
     // core
     val scalaScraper = "2.1.0"
@@ -50,7 +50,7 @@ object Dependencies {
     "io.circe"   %% "circe-parser"        % V.circe,
     "io.circe"   %% "circe-literal"       % V.circe,
     "io.circe"   %% "circe-refined"       % V.circe,
-    "co.fs2" %% "fs2-core" % V.fs2
+    "co.fs2"     %% "fs2-core"            % V.fs2
   )
 
   lazy val coreDependencies = Seq(
