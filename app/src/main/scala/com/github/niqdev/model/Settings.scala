@@ -76,7 +76,7 @@ object Settings extends SettingsInstances {
   import ciris.enumeratum.enumEntryConfigDecoder
 
   // TODO move in case class or default parameter
-  private[this] val defaultLogLevel: LogLevel               = LogLevel.Error
+  private[this] val defaultLogLevel: LogLevel               = LogLevel.Debug
   private[this] val defaultEnvironment: Environment         = Environment.Local
   private[this] val defaultPort: PortNumber                 = 8080
   private[this] val defaultHost: NonEmptyString             = "localhost"
@@ -86,7 +86,7 @@ object Settings extends SettingsInstances {
   private[this] val defaultDbUrl: String                    = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
   private[this] val defaultDbUsername: String               = "h2Username"
   private[this] val defaultDbPassword: String               = "h2Password"
-  private[this] val defaultDbConnectionPoolSize: PosInt     = 6
+  private[this] val defaultDbConnectionPoolSize: PosInt     = 32
 
   def apply(
     logLevel: LogLevel,

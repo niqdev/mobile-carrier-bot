@@ -2,28 +2,30 @@ package com.github.niqdev
 
 import java.util.concurrent.{ ExecutorService, Executors, TimeUnit }
 
-import cats.effect.{ ExitCode, IO, IOApp, Sync, Timer, _ }
-import cats.implicits.{ catsSyntaxApply, toFlatMapOps, toFunctorOps }
+import cats.effect._
+import cats.implicits.catsSyntaxApply
 import cats.syntax.show.toShow
-import com.github.niqdev.http.{ HttpServer, TelegramClient }
+import com.github.ghik.silencer.silent
+import com.github.niqdev.http.{ HttpResource, TelegramClient }
 import com.github.niqdev.model.Settings
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.http4s.server.Server
 
 import scala.concurrent.ExecutionContext
 
 object Main extends IOApp.WithContext {
 
-  def start[F[_]: ConcurrentEffect: Timer](log: Logger[F]): F[Unit] =
+  @silent
+  def start[F[_]: ContextShift: ConcurrentEffect: Timer](log: Logger[F]): Resource[F, Server[F]] =
     for {
-      settings <- Settings.loadF[F]
-      _        <- log.debug(s"Settings: ${settings.show}")
-      _ <- HttpServer[F]
-        .start(settings)
-        .merge(TelegramClient[F].startPolling(settings.telegram, executionContext))
-        .compile
-        .drain
-    } yield ()
+      settings <- Settings.load[F]
+      _        <- Resource.liftF(log.debug(s"Settings: ${settings.show}"))
+      //xa     <- Database.transactor[F](settings.database)
+      client   <- HttpResource[F].client(executionContext)
+      server   <- HttpResource[F].server(settings)
+      _        <- TelegramClient.startPolling[F](client, settings.telegram)
+    } yield server
 
   private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
     log.error(e)("Application failed") *> Sync[F].pure(ExitCode.Error)
@@ -37,7 +39,7 @@ object Main extends IOApp.WithContext {
   override def run(args: List[String]): IO[ExitCode] =
     Slf4jLogger
       .create[IO]
-      .flatMap(log => start[IO](log).redeemWith(error[IO](log), success[IO]))
+      .flatMap(log => start[IO](log).use(_ => IO.never).redeemWith(error[IO](log), success[IO]))
 
   override protected def executionContextResource: Resource[SyncIO, ExecutionContext] = {
     val acquire = SyncIO(Executors.newCachedThreadPool())
