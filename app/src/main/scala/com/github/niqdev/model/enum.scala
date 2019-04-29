@@ -1,8 +1,10 @@
 package com.github.niqdev
 package model
 
-import enumeratum.EnumEntry.{ Snakecase, Uppercase }
+import enumeratum.EnumEntry.{ Lowercase, Snakecase, Uppercase }
 import enumeratum.{ Enum, EnumEntry }
+import eu.timepit.refined.auto.autoRefineV
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
 
 /**
@@ -48,4 +50,29 @@ object LogLevel extends Enum[LogLevel] with LogLevelInstances {
   case object Warn  extends LogLevel
   case object Error extends LogLevel
 
+}
+
+/**
+  *
+  */
+sealed abstract class DatabaseDriver(val className: NonEmptyString) extends EnumEntry with Lowercase
+
+sealed trait DatabaseDriverInstances {
+
+  implicit val encodeDatabaseDriver: Encoder[DatabaseDriver] =
+    Encoder.encodeString.contramap[DatabaseDriver](_.className.value)
+}
+
+object DatabaseDriver extends Enum[DatabaseDriver] with DatabaseDriverInstances {
+
+  // macro
+  val values = findValues
+
+  case object PostgreSQL extends DatabaseDriver("org.postgresql.Driver")
+  case object H2         extends DatabaseDriver("org.h2.Driver")
+  case object Cache      extends DatabaseDriver("INVALID_CLASS_NAME")
+
+  final type PostgreSQL = PostgreSQL.type
+  final type H2         = H2.type
+  final type Cache      = Cache.type
 }
