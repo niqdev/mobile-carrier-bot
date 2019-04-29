@@ -85,7 +85,7 @@ object Settings extends SettingsInstances {
   private[this] val defaultDatabaseUrl: String                     = ""
   private[this] val defaultDatabaseUsername: String                = ""
   private[this] val defaultDatabasePassword: String                = ""
-  private[this] val defaultDatabaseConnectionPoolSize: PosInt      = 0
+  private[this] val defaultDatabaseConnectionPoolSize: PosInt      = 1
 
   def apply(
     logLevel: LogLevel,

@@ -70,7 +70,7 @@ object DatabaseDriver extends Enum[DatabaseDriver] with DatabaseDriverInstances 
 
   case object PostgreSQL extends DatabaseDriver("org.postgresql.Driver")
   case object H2         extends DatabaseDriver("org.h2.Driver")
-  case object Cache      extends DatabaseDriver("INVALID_CLASS_NAME")
+  case object Cache      extends DatabaseDriver("cats.effect.concurrent.Ref")
 
   final type PostgreSQL = PostgreSQL.type
   final type H2         = H2.type

@@ -9,7 +9,6 @@ import com.github.ghik.silencer.silent
 import com.github.niqdev.http.{ HttpResource, TelegramClient }
 import com.github.niqdev.model.{ DatabaseDriver, Settings }
 import com.github.niqdev.repository.{ Database, TelegramRepository }
-import com.github.niqdev.repository.inmemory.TelegramRepositoryInMemory
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.Server

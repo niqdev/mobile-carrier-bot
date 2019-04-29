@@ -19,7 +19,7 @@ object Database {
       connectEC  <- ExecutionContexts.fixedThreadPool[F](settings.connectionPoolSize.value)
       transactEC <- ExecutionContexts.cachedThreadPool[F]
       xa <- HikariTransactor.newHikariTransactor[F](
-        settings.driverClassName,
+        settings.driver.className.value,
         settings.url,
         settings.username,
         settings.password,
