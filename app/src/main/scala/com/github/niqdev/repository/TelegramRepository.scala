@@ -21,12 +21,11 @@ sealed trait TelegramRepositoryInstances {
   implicit def cacheTelegramRepository[F[_]: Sync]: TelegramRepository[F, DatabaseDriver.Cache] =
     new TelegramRepository[F, DatabaseDriver.Cache] {
 
-      /**
-        * [[cats.effect.concurrent.Ref.unsafe]]
-        *
-        * Preserve referential transparency since constructor is private
-        */
-      private val ref: Ref[F, Long] = Ref.unsafe[F, Long](0)
+      /*
+       * preserve referential transparency since constructor is private
+       */
+      private val ref: Ref[F, Long] =
+        Ref.unsafe[F, Long](0)
 
       override def setOffset(offset: Long): F[Unit] =
         ref.set(offset)

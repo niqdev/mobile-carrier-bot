@@ -1,6 +1,6 @@
 # mobile-carrier-bot
 
-A bot to access mobile carrier services implemented in Scala using Tagless Final style
+A bot to access mobile carrier services implemented with the Typelevel stack using Tagless Final style
 
 ## Endpoints
 
@@ -28,17 +28,13 @@ TELEGRAM_API_TOKEN=123:xyz \
 sbt app/run
 ```
 
-### sbt aliases
+### Sbt aliases
 
 * `checkFormat` checks format
 * `format` formats sources
 * `update` checks outdated dependencies
 * `build` checks format and runs tests
 
-### other sbt plugins
+### Other sbt plugins
 
 * `dependencyTree` shows project dependencies
-
-TODO
-
-https://github.com/topics/http4s
