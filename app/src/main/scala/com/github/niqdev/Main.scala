@@ -16,7 +16,7 @@ object Main extends IOApp.WithContext {
 
   def start[F[_]: ConcurrentEffect: Timer](log: Logger[F]): F[Unit] =
     for {
-      settings <- Settings.load[F]
+      settings <- Settings.loadF[F]
       _        <- log.debug(s"Settings: ${settings.show}")
       _ <- HttpServer[F]
         .start(settings)

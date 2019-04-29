@@ -3,7 +3,7 @@ package model
 
 import cats.effect.Sync
 import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{Decoder, HCursor}
+import io.circe.{ Decoder, HCursor }
 import org.http4s.EntityDecoder
 import org.http4s.circe.jsonOf
 

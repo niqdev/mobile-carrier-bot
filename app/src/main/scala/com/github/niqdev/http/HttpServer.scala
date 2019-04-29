@@ -1,7 +1,7 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{ConcurrentEffect, ExitCode, Timer}
+import cats.effect.{ ConcurrentEffect, ExitCode, Timer }
 import com.github.niqdev.model.Settings
 import com.github.niqdev.service.HealthCheckService
 import fs2.Stream

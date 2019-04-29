@@ -2,7 +2,7 @@ package com.github.niqdev
 package http
 
 import cats.effect._
-import com.github.niqdev.model.{Response, TelegramSettings, Update}
+import com.github.niqdev.model.{ Response, TelegramSettings, Update }
 import fs2.Stream
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder

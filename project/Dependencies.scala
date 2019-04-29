@@ -17,6 +17,7 @@ object Dependencies {
     val http4s = "0.20.0"
     val circe  = "0.11.1"
     val fs2    = "1.0.4"
+    val doobie = "0.6.0"
 
     // core
     val scalaScraper = "2.1.0"
@@ -38,20 +39,23 @@ object Dependencies {
   )
 
   lazy val appDependencies = Seq(
-    "is.cir"     %% "ciris-core"          % V.ciris,
-    "is.cir"     %% "ciris-cats"          % V.ciris,
-    "is.cir"     %% "ciris-refined"       % V.ciris,
-    "is.cir"     %% "ciris-enumeratum"    % V.ciris,
-    "org.http4s" %% "http4s-dsl"          % V.http4s,
-    "org.http4s" %% "http4s-blaze-server" % V.http4s,
-    "org.http4s" %% "http4s-blaze-client" % V.http4s,
-    "org.http4s" %% "http4s-circe"        % V.http4s,
-    "io.circe"   %% "circe-core"          % V.circe,
-    "io.circe"   %% "circe-generic"       % V.circe,
-    "io.circe"   %% "circe-parser"        % V.circe,
-    "io.circe"   %% "circe-literal"       % V.circe,
-    "io.circe"   %% "circe-refined"       % V.circe,
-    "co.fs2"     %% "fs2-core"            % V.fs2
+    "is.cir"       %% "ciris-core"          % V.ciris,
+    "is.cir"       %% "ciris-cats"          % V.ciris,
+    "is.cir"       %% "ciris-refined"       % V.ciris,
+    "is.cir"       %% "ciris-enumeratum"    % V.ciris,
+    "org.http4s"   %% "http4s-dsl"          % V.http4s,
+    "org.http4s"   %% "http4s-blaze-server" % V.http4s,
+    "org.http4s"   %% "http4s-blaze-client" % V.http4s,
+    "org.http4s"   %% "http4s-circe"        % V.http4s,
+    "io.circe"     %% "circe-core"          % V.circe,
+    "io.circe"     %% "circe-generic"       % V.circe,
+    "io.circe"     %% "circe-parser"        % V.circe,
+    "io.circe"     %% "circe-literal"       % V.circe,
+    "io.circe"     %% "circe-refined"       % V.circe,
+    "co.fs2"       %% "fs2-core"            % V.fs2,
+    "org.tpolecat" %% "doobie-core"         % V.doobie,
+    "org.tpolecat" %% "doobie-h2"           % V.doobie,
+    "org.tpolecat" %% "doobie-hikari"       % V.doobie
   )
 
   lazy val coreDependencies = Seq(
