@@ -15,10 +15,12 @@ trait MobileCarrierClient[F[_], MNO] {
 }
 
 object MobileCarrierClient extends MobileCarrierClientInstances {
-  def apply[F[_], MNO](implicit C: MobileCarrierClient[F, MNO]): MobileCarrierClient[F, MNO] = C
+  def apply[F[_], MNO](
+    implicit C: MobileCarrierClient[F, MNO]
+  ): MobileCarrierClient[F, MNO] = C
 }
 
-trait MobileCarrierClientInstances {
+sealed trait MobileCarrierClientInstances {
 
   implicit def threeMobileCarrierClient[F[_]: Sync]: MobileCarrierClient[F, ThreeIe] =
     (username: String, password: String) =>

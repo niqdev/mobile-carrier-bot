@@ -33,9 +33,8 @@ final case class TelegramSettings(
   def uri = s"$baseUri/bot${apiToken.value}"
 }
 
-// TODO refined
 final case class DatabaseSettings(
-  driverClassName: String,
+  driver: DatabaseDriver,
   url: String,
   username: String,
   password: String,
@@ -62,7 +61,7 @@ sealed trait SettingsInstances {
         |TELEGRAM_API_TOKEN=${settings.telegram.apiToken}
         |TELEGRAM_POLLING_SECONDS=${settings.telegram.polling}
         |# db
-        |DB_DRIVER_CLASS_NAME=${settings.database.driverClassName}
+        |DB_DRIVER=${settings.database.driver.entryName}
         |DB_URL=${settings.database.url}
         |DB_USERNAME=${settings.database.username}
         |DB_PASSWORD=${settings.database.password}
@@ -76,17 +75,17 @@ object Settings extends SettingsInstances {
   import ciris.enumeratum.enumEntryConfigDecoder
 
   // TODO move in case class or default parameter
-  private[this] val defaultLogLevel: LogLevel               = LogLevel.Debug
-  private[this] val defaultEnvironment: Environment         = Environment.Local
-  private[this] val defaultPort: PortNumber                 = 8080
-  private[this] val defaultHost: NonEmptyString             = "localhost"
-  private[this] val defaultTelegramApiToken: NonEmptyString = "API_TOKEN"
-  private[this] val defaultTelegramPolling: PosLong         = 5L
-  private[this] val defaultDbDriverClassName: String        = "org.h2.Driver"
-  private[this] val defaultDbUrl: String                    = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
-  private[this] val defaultDbUsername: String               = "h2Username"
-  private[this] val defaultDbPassword: String               = "h2Password"
-  private[this] val defaultDbConnectionPoolSize: PosInt     = 32
+  private[this] val defaultLogLevel: LogLevel                      = LogLevel.Debug
+  private[this] val defaultEnvironment: Environment                = Environment.Local
+  private[this] val defaultPort: PortNumber                        = 8080
+  private[this] val defaultHost: NonEmptyString                    = "localhost"
+  private[this] val defaultTelegramApiToken: NonEmptyString        = "API_TOKEN"
+  private[this] val defaultTelegramPolling: PosLong                = 5L
+  private[this] val defaultDatabaseDriverClassName: DatabaseDriver = DatabaseDriver.Cache
+  private[this] val defaultDatabaseUrl: String                     = ""
+  private[this] val defaultDatabaseUsername: String                = ""
+  private[this] val defaultDatabasePassword: String                = ""
+  private[this] val defaultDatabaseConnectionPoolSize: PosInt      = 0
 
   def apply(
     logLevel: LogLevel,
@@ -95,18 +94,24 @@ object Settings extends SettingsInstances {
     httpHost: NonEmptyString,
     telegramApiToken: NonEmptyString,
     telegramPolling: PosLong,
-    driverClassName: String,
-    url: String,
-    username: String,
-    password: String,
-    connectionPoolSize: PosInt
+    databaseDriver: DatabaseDriver,
+    databaseUrl: String,
+    databaseUsername: String,
+    databasePassword: String,
+    databaseConnectionPoolSize: PosInt
   ): Settings =
     Settings(
       logLevel,
       environment,
       ServerSettings(httpPort, httpHost),
       TelegramSettings(telegramApiToken, telegramPolling),
-      DatabaseSettings(driverClassName, url, username, password, connectionPoolSize)
+      DatabaseSettings(
+        databaseDriver,
+        databaseUrl,
+        databaseUsername,
+        databasePassword,
+        databaseConnectionPoolSize
+      )
     )
 
   def loadF[F[_]: Sync]: F[Settings] =
@@ -123,16 +128,16 @@ object Settings extends SettingsInstances {
         .orValue(defaultTelegramApiToken),
       envF[F, PosLong]("TELEGRAM_POLLING_SECONDS")
         .orValue(defaultTelegramPolling),
-      envF[F, String]("DB_DRIVER_CLASS_NAME")
-        .orValue(defaultDbDriverClassName),
+      envF[F, DatabaseDriver]("DB_DRIVER")
+        .orValue(defaultDatabaseDriverClassName),
       envF[F, String]("DB_URL")
-        .orValue(defaultDbUrl),
+        .orValue(defaultDatabaseUrl),
       envF[F, String]("DB_USERNAME")
-        .orValue(defaultDbUsername),
+        .orValue(defaultDatabaseUsername),
       envF[F, String]("DB_PASSWORD")
-        .orValue(defaultDbPassword),
+        .orValue(defaultDatabasePassword),
       envF[F, PosInt]("DB_CONNECTION_POOL_SIZE")
-        .orValue(defaultDbConnectionPoolSize)
+        .orValue(defaultDatabaseConnectionPoolSize)
     )(Settings.apply).orRaiseThrowable
 
   def load[F[_]: Sync]: Resource[F, Settings] =

@@ -7,7 +7,9 @@ import cats.implicits.catsSyntaxApply
 import cats.syntax.show.toShow
 import com.github.ghik.silencer.silent
 import com.github.niqdev.http.{ HttpResource, TelegramClient }
-import com.github.niqdev.model.Settings
+import com.github.niqdev.model.{ DatabaseDriver, Settings }
+import com.github.niqdev.repository.{ Database, TelegramRepository }
+import com.github.niqdev.repository.inmemory.TelegramRepositoryInMemory
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.Server
@@ -20,11 +22,12 @@ object Main extends IOApp.WithContext {
   def start[F[_]: ContextShift: ConcurrentEffect: Timer](log: Logger[F]): Resource[F, Server[F]] =
     for {
       settings <- Settings.load[F]
-      _        <- Resource.liftF(log.debug(s"Settings: ${settings.show}"))
-      //xa     <- Database.transactor[F](settings.database)
-      client   <- HttpResource[F].client(executionContext)
-      server   <- HttpResource[F].server(settings)
-      _        <- TelegramClient.startPolling[F](client, settings.telegram)
+      xa       <- Database.transactor[F](settings.database)
+      _                  = log.debug(s"Settings: ${settings.show}")
+      telegramRepository = TelegramRepository[F, DatabaseDriver.Cache]
+      client <- HttpResource[F].client(executionContext)
+      server <- HttpResource[F].server(settings)
+      _      <- TelegramClient.startPolling[F](client, settings.telegram)
     } yield server
 
   private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
