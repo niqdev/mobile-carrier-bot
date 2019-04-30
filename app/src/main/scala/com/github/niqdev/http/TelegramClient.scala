@@ -11,21 +11,24 @@ import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
 
-import scala.concurrent.duration.{ DurationLong, FiniteDuration }
+import scala.concurrent.duration.DurationLong
 
 sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   settings: TelegramSettings,
   log: Logger[F]
 ) {
 
-  private[http] def logStream[T]: T => Stream[F, T] =
-    (t: T) => Stream.eval(log.debug(s"$t").map(_ => t))
+  private[http] def logStream[T]: T => F[T] =
+    (t: T) => log.debug(s"$t").map(_ => t)
 
-  private[http] def getUpdates(client: Client[F]): FiniteDuration => Stream[F, Response[Vector[Update]]] =
-    _ =>
-      Stream.eval {
-        client.expect[Response[Vector[Update]]](s"${settings.apiUri}/getUpdates")
-      }
+  /**
+    * [[https://core.telegram.org/bots/api#getupdates getUpdates]]
+    */
+  private[http] def getUpdates(client: Client[F]): Long => F[Response[Vector[Update]]] =
+    offset => client.expect[Response[Vector[Update]]](s"${settings.apiUri}/getUpdates?offset=$offset")
+
+  private[http] def findLastOffset(updates: Vector[Update]): Long =
+    updates.max.id
 
   @silent
   def startPolling(
@@ -34,8 +37,22 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   ) =
     Stream
       .awakeEvery[F](settings.polling.value.seconds)
-      .flatMap(getUpdates(client))
-      .flatMap(logStream[Response[Vector[Update]]])
+      .evalMap(_ => repository.getOffset)
+      .evalMap(getUpdates(client))
+      .evalMap(logStream[Response[Vector[Update]]])
+      .collect {
+        case Response(true, _, Some(updates), _, _) if updates.nonEmpty =>
+          (findLastOffset(updates), updates)
+      }
+      .evalMap {
+        case (lastOffset, updates) =>
+          // an update is considered confirmed as soon as getUpdates
+          // is called with an offset higher than its update_id
+          repository.setOffset(lastOffset + 1).map(_ => updates)
+      }
+      // flatten
+      .flatMap(Stream.emits)
+      .evalMap(logStream[Update])
       .holdOptionResource
 }
 

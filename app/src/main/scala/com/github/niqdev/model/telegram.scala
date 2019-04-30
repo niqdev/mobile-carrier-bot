@@ -2,10 +2,14 @@ package com.github.niqdev
 package model
 
 import cats.effect.Sync
+import enumeratum.EnumEntry.{ Snakecase, Uppercase }
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{ Decoder, HCursor }
 import org.http4s.EntityDecoder
 import org.http4s.circe.jsonOf
+import enumeratum.{ Enum, EnumEntry }
+import eu.timepit.refined.types.string.NonEmptyString
+import eu.timepit.refined.auto.autoRefineV
 
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
@@ -84,6 +88,9 @@ object Update {
     Decoder.forProduct2(
       "update_id",
       "message")(Update.apply)
+
+  implicit val orderByUpdateId: Ordering[Update] =
+    Ordering.by(_.id)
 }
 
 /**
@@ -122,7 +129,19 @@ object Response {
 
   implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Vector[Update]]] =
     jsonOf[F, Response[Vector[Update]]]
+}
 
-  def isValid[T](response: Response[T]): Boolean =
-    response.ok
+/**
+  * [[https://core.telegram.org/bots#global-commands BotCommand]]
+  */
+sealed abstract class BotCommand(val command: NonEmptyString) extends EnumEntry with Snakecase with Uppercase
+
+object BotCommand extends Enum[BotCommand] {
+
+  // macro
+  val values = findValues
+
+  case object Start    extends BotCommand("/start")
+  case object Help     extends BotCommand("/help")
+  case object Settings extends BotCommand("/settings")
 }
