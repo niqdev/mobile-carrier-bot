@@ -30,7 +30,7 @@ final case class TelegramSettings(
   polling: PosLong,
   baseUri: String = "https://api.telegram.org"
 ) {
-  def uri = s"$baseUri/bot${apiToken.value}"
+  def apiUri = s"$baseUri/bot${apiToken.value}"
 }
 
 final case class DatabaseSettings(
