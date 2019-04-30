@@ -1,19 +1,27 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{ ConcurrentEffect, Resource, Sync, Timer }
+import cats.effect.{ ConcurrentEffect, Resource, Timer }
+import com.github.ghik.silencer.silent
 import com.github.niqdev.model.{ Response, TelegramSettings, Update }
+import com.github.niqdev.repository.TelegramRepository
 import fs2.Stream
 import fs2.concurrent.Signal
+import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
 
 import scala.concurrent.duration.DurationLong
 
 sealed abstract class TelegramClient {
 
-  def startPolling[F[_]: ConcurrentEffect: Timer](
-    client: Client[F],
-    settings: TelegramSettings
+  @silent
+  def startPolling[F[_]: ConcurrentEffect: Timer, D](
+    settings: TelegramSettings,
+    repository: TelegramRepository[F, D],
+    client: Client[F]
+  )(
+    log: Logger[F]
   ): Resource[F, Signal[F, Option[Unit]]] =
     Stream
       .awakeEvery[F](settings.polling.value.seconds)
@@ -23,18 +31,22 @@ sealed abstract class TelegramClient {
             client.expect[Response[Vector[Update]]](s"${settings.uri}/getUpdates")
           }
       )
-      .flatMap(response => Stream.eval(Sync[F].delay(println(response))))
+      .flatMap(response => Stream.eval(log.debug(s"$response")))
       .holdOptionResource
 }
 
 object TelegramClient {
 
-  def apply(): TelegramClient =
+  private[http] def apply: TelegramClient =
     new TelegramClient {}
 
-  def startPolling[F[_]: ConcurrentEffect: Timer](
-    client: Client[F],
-    settings: TelegramSettings
+  def startPolling[F[_]: ConcurrentEffect: Timer, D](
+    settings: TelegramSettings,
+    repository: TelegramRepository[F, D],
+    client: Client[F]
   ): Resource[F, Signal[F, Option[Unit]]] =
-    apply().startPolling(client, settings)
+    for {
+      log    <- Resource.liftF(Slf4jLogger.create[F])
+      client <- apply.startPolling(settings, repository, client)(log)
+    } yield client
 }

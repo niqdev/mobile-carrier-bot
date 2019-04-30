@@ -15,7 +15,7 @@ lazy val buildInfoSettings = Seq(
 )
 
 lazy val app = (project in file("app"))
-// BaseSpec otherwise isn't accessible
+  // makes BaseSpec accessible
   .dependsOn(core % "compile->compile;test->test")
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoSettings)

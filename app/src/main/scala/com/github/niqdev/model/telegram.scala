@@ -122,4 +122,7 @@ object Response {
 
   implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Vector[Update]]] =
     jsonOf[F, Response[Vector[Update]]]
+
+  def isValid[T](response: Response[T]): Boolean =
+    response.ok
 }

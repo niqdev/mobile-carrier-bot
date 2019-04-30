@@ -18,15 +18,19 @@ import scala.concurrent.ExecutionContext
 object Main extends IOApp.WithContext {
 
   @silent
-  def start[F[_]: ContextShift: ConcurrentEffect: Timer](log: Logger[F]): Resource[F, Server[F]] =
+  def start[F[_]: ContextShift: ConcurrentEffect: Timer, D](
+    log: Logger[F]
+  )(
+    implicit TR: TelegramRepository[F, D]
+  ): Resource[F, Server[F]] =
     for {
       settings <- Settings.load[F]
       xa       <- Database.transactor[F](settings.database)
       _                  = log.debug(s"Settings: ${settings.show}")
-      telegramRepository = TelegramRepository[F, DatabaseDriver.Cache]
+      telegramRepository = TelegramRepository[F, D]
       client <- HttpResource[F].client(executionContext)
       server <- HttpResource[F].server(settings)
-      _      <- TelegramClient.startPolling[F](client, settings.telegram)
+      _      <- TelegramClient.startPolling[F, D](settings.telegram, telegramRepository, client)
     } yield server
 
   private[this] def error[F[_]: Sync](log: Logger[F])(e: Throwable): F[ExitCode] =
@@ -41,7 +45,12 @@ object Main extends IOApp.WithContext {
   override def run(args: List[String]): IO[ExitCode] =
     Slf4jLogger
       .create[IO]
-      .flatMap(log => start[IO](log).use(_ => IO.never).redeemWith(error[IO](log), success[IO]))
+      .flatMap(
+        log =>
+          start[IO, DatabaseDriver.Cache](log)
+            .use(_ => IO.never)
+            .redeemWith(error[IO](log), success[IO])
+      )
 
   override protected def executionContextResource: Resource[SyncIO, ExecutionContext] = {
     val acquire = SyncIO(Executors.newCachedThreadPool())
