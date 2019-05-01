@@ -1,12 +1,14 @@
 # mobile-carrier-bot
 
-A bot to access mobile carrier services implemented with the Typelevel stack using Tagless Final style
+A bot to access mobile carrier services implemented on top of the Typelevel stack using Tagless Final style
+
+---
 
 :construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
 :warning: **Heavy Work in Progress** :warning:
 :construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
 
-TODO (not in order)
+*TODO (not in order):*
 
 - [x] skeleton, plugins, setup
 - [ ] architecture docs and diagrams
