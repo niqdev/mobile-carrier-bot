@@ -2,6 +2,10 @@
 
 A bot to access mobile carrier services implemented with the Typelevel stack using Tagless Final style
 
+> Heavy Work in Progress :warning:
+
+:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
+
 ## Endpoints
 
 ```
