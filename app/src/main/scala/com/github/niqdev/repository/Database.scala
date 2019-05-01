@@ -9,6 +9,7 @@ import doobie.util.ExecutionContexts
 // TODO Flyway
 // https://flywaydb.org
 // https://github.com/pauljamescleary/scala-pet-store/blob/master/src/main/scala/io/github/pauljamescleary/petstore/config/DatabaseConfig.scala#L24
+// https://github.com/jaspervz/todo-http4s-doobie/blob/master/src/main/scala/db/Database.scala#L13
 object Database {
 
   /*

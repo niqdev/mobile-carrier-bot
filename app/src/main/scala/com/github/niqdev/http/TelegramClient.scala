@@ -1,15 +1,15 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{ ConcurrentEffect, Resource, Timer }
+import cats.effect.{ConcurrentEffect, Resource, Timer}
 import cats.syntax.functor.toFunctorOps
-import com.github.ghik.silencer.silent
-import com.github.niqdev.model.{ Response, TelegramSettings, Update }
+import com.github.niqdev.model._
 import com.github.niqdev.repository.TelegramRepository
 import fs2.Stream
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
+import org.http4s.{Method, Request, Uri}
 
 import scala.concurrent.duration.DurationLong
 
@@ -21,16 +21,35 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   private[http] def logStream[T]: T => F[T] =
     (t: T) => log.debug(s"$t").map(_ => t)
 
+  // FIXME exception during macro expansion: uri"${settings.baseUri}"
+  // import org.http4s.Http4sLiteralSyntax
+  private[http] def buildPath(path: String): Uri =
+    Uri.unsafeFromString(s"${settings.baseUri}")
+      .withPath(s"/bot${settings.apiToken.value}$path")
+
   /**
     * [[https://core.telegram.org/bots/api#getupdates getUpdates]]
     */
   private[http] def getUpdates(client: Client[F]): Long => F[Response[Vector[Update]]] =
-    offset => client.expect[Response[Vector[Update]]](s"${settings.apiUri}/getUpdates?offset=$offset")
+    offset => client
+      .expect[Response[Vector[Update]]](buildPath("/getUpdates").withQueryParam("offset", offset))
 
   private[http] def findLastOffset(updates: Vector[Update]): Long =
     updates.max.id
 
-  @silent
+  /**
+    * [[https://core.telegram.org/bots/api#sendmessage SendMessage]]
+    */
+  private[http] def sendMessage(client: Client[F]): Long => F[Response[Message]] =
+    userId => {
+      val request = Request[F](
+        Method.POST,
+        buildPath("/sendMessage")
+      ).withEntity(SendMessage(s"$userId", "hello"))
+
+      client.expect[Response[Message]](request)
+    }
+
   def startPolling(
     repository: TelegramRepository[F, D],
     client: Client[F]
@@ -41,6 +60,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       .evalMap(getUpdates(client))
       .evalMap(logStream[Response[Vector[Update]]])
       .collect {
+        // ignore invalid response
         case Response(true, _, Some(updates), _, _) if updates.nonEmpty =>
           (findLastOffset(updates), updates)
       }
@@ -53,9 +73,22 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       // flatten
       .flatMap(Stream.emits)
       .evalMap(logStream[Update])
+      .collect {
+        // ignore invalid message
+        case Update(_, Some(Message(_, Some(user), _, Some(_)))) =>
+          // TODO text
+          // (1) validate text to command
+          // (2) respond to user
+          user.id
+      }
+      .evalMap(sendMessage(client))
+      .evalMap(logStream[Response[Message]])
       .holdOptionResource
 }
 
+/**
+  * [[https://core.telegram.org/bots/api#available-methods]]
+  */
 object TelegramClient {
 
   private[http] def apply[F[_]: ConcurrentEffect: Timer, D](

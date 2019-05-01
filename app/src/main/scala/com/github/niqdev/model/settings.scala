@@ -29,9 +29,7 @@ final case class TelegramSettings(
   apiToken: NonEmptyString,
   polling: PosLong,
   baseUri: String = "https://api.telegram.org"
-) {
-  def apiUri = s"$baseUri/bot${apiToken.value}"
-}
+)
 
 final case class DatabaseSettings(
   driver: DatabaseDriver,

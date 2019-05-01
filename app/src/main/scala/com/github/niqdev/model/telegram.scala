@@ -1,15 +1,16 @@
 package com.github.niqdev
 package model
 
+import cats.Applicative
 import cats.effect.Sync
 import enumeratum.EnumEntry.{ Snakecase, Uppercase }
-import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{ Decoder, HCursor }
-import org.http4s.EntityDecoder
-import org.http4s.circe.jsonOf
 import enumeratum.{ Enum, EnumEntry }
-import eu.timepit.refined.types.string.NonEmptyString
 import eu.timepit.refined.auto.autoRefineV
+import eu.timepit.refined.types.string.NonEmptyString
+import io.circe.generic.semiauto.deriveDecoder
+import io.circe.{ Decoder, Encoder, HCursor }
+import org.http4s.circe.{ jsonEncoderOf, jsonOf }
+import org.http4s.{ EntityDecoder, EntityEncoder }
 
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
@@ -45,8 +46,7 @@ object User {
       "language_code")(User.apply)
 }
 
-// TODO refined + date
-// TODO validation: ignore if user or text is None, dedup
+// TODO refined + date (Instant or ZonedDateTime)
 /**
   * [[https://core.telegram.org/bots/api#message Message]]
   *
@@ -129,6 +129,26 @@ object Response {
 
   implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Vector[Update]]] =
     jsonOf[F, Response[Vector[Update]]]
+
+  implicit def responseMessage[F[_]: Sync]: EntityDecoder[F, Response[Message]] =
+    jsonOf[F, Response[Message]]
+}
+
+// TODO parse_mode, reply_markup
+final case class SendMessage(
+  chatId: String,
+  text: String
+)
+
+object SendMessage {
+
+  implicit val sendMessageEncoder: Encoder[SendMessage] =
+    Encoder.forProduct2("chat_id", "text")(value =>
+      (value.chatId, value.text)
+    )
+
+  implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
+    jsonEncoderOf[F, SendMessage]
 }
 
 /**
