@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+  application:
+    container_name: mobile-carrier-bot
+    image: niqdev/mobile-carrier-bot-app:0.1
+    environment:
+      - HTTP_PORT=8888
+    ports:
+      - 8080:8888
