@@ -3,10 +3,7 @@ package model
 
 import cats.Applicative
 import cats.effect.Sync
-import enumeratum.EnumEntry.{ Snakecase, Uppercase }
 import enumeratum.{ Enum, EnumEntry }
-import eu.timepit.refined.auto.autoRefineV
-import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.{ Decoder, Encoder, HCursor }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
@@ -127,6 +124,7 @@ object Response {
   implicit def responseDecoder[T: Decoder]: Decoder[Response[T]] =
     deriveDecoder[Response[T]]
 
+  // TODO List no Vector ???
   implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Vector[Update]]] =
     jsonOf[F, Response[Vector[Update]]]
 
@@ -142,6 +140,10 @@ final case class SendMessage(
 
 object SendMessage {
 
+  // chat_id: Integer or String
+  def apply(chatId: Long, text: String): SendMessage =
+    SendMessage(s"$chatId", text)
+
   implicit val sendMessageEncoder: Encoder[SendMessage] =
     Encoder.forProduct2("chat_id", "text")(value =>
       (value.chatId, value.text)
@@ -154,14 +156,23 @@ object SendMessage {
 /**
   * [[https://core.telegram.org/bots#global-commands BotCommand]]
   */
-sealed abstract class BotCommand(val command: NonEmptyString) extends EnumEntry with Snakecase with Uppercase
+sealed abstract class BotCommand(override val entryName: String) extends EnumEntry
 
 object BotCommand extends Enum[BotCommand] {
 
   // macro
   val values = findValues
 
-  case object Start    extends BotCommand("/start")
-  case object Help     extends BotCommand("/help")
-  case object Settings extends BotCommand("/settings")
+  case object Start extends BotCommand("/start")
+  case object Help  extends BotCommand("/help")
+
+  def parseCommand(value: String): String =
+    withNameOption(value) match {
+      case Some(Start) =>
+        "TODO start"
+      case Some(Help) =>
+        "TODO help"
+      case _ =>
+        "unknown command"
+    }
 }

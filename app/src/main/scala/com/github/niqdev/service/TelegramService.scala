@@ -6,3 +6,5 @@ import com.github.niqdev.repository.TelegramRepository
 
 @silent
 sealed abstract class TelegramService[F[_], D](repository: TelegramRepository[F, D]) {}
+
+// TODO setNextOffset = offset + 1
