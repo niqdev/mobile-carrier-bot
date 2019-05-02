@@ -38,6 +38,9 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] grafana dashboard
 - [ ] backup/restore logs and metrics even if re-create cluster
 - [ ] generate and publish scaladoc
+- [ ] fix manual Circe codecs with withSnakeCaseMemberNames config
+- [ ] add gatling stress tests
+- [ ] add integration tests
 
 ## Endpoints
 

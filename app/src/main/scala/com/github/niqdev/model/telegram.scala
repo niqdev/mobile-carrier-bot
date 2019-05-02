@@ -9,6 +9,25 @@ import io.circe.{ Decoder, Encoder, HCursor }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 
+/*
+
+# FIXME
+https://github.com/circe/circe/blob/master/modules/generic-extras/src/test/scala/io/circe/generic/extras/ConfiguredJsonCodecWithKeySuite.scala
+
+import io.circe.generic.extras.{ Configuration, ConfiguredJsonCodec }
+import io.circe.parser._
+import io.circe.syntax._
+
+@ConfiguredJsonCodec
+finale case class Example()
+
+import io.circe.generic.extras.auto._
+
+implicit val snakeCase: Configuration = Configuration.default.withSnakeCaseMemberNames
+
+*/
+
+ */
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
 /**
