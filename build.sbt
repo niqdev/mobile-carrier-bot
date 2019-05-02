@@ -1,7 +1,7 @@
 import Dependencies.{ appDependencies, coreDependencies, sharedDependencies, testDependencies }
 
 lazy val I = new {
-  val maintainer = "niqdev"
+  val maintainer   = "niqdev"
   val organization = "com.github.niqdev"
   val name         = "mobile-carrier-bot"
   val scalaVersion = "2.12.8"
@@ -18,7 +18,7 @@ lazy val buildInfoSettings = Seq(
 lazy val dockerSettings = Seq(
   maintainer in Docker := I.maintainer,
   // FIXME upgrade to openjdk:11
-  dockerBaseImage in Docker := "openjdk:8-jre-alpine3.8",
+  dockerBaseImage in Docker  := "openjdk:8-jre-alpine3.8",
   dockerRepository in Docker := Some(I.maintainer),
   // FIXME Seq(sys.env.get("HTTP_PORT").getOrElse(8080))
   dockerExposedPorts := Seq(8080)

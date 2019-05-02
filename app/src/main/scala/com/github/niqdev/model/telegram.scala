@@ -27,7 +27,6 @@ implicit val snakeCase: Configuration = Configuration.default.withSnakeCaseMembe
 
 */
 
- */
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
 /**
