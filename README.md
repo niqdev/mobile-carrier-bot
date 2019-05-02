@@ -30,8 +30,8 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] [slate](https://lord.github.io/slate) static site for api
 - [ ] [gitpitch](https://gitpitch.com) for 5@4 presentation
 - [ ] constrain all types with refined where possible
-- [ ] travis
-- [ ] publish to dockerhub
+- [ ] travis + automate publish to dockerhub
+- [x] publish to dockerhub
 - [ ] create simple deployment k8s chart + argocd app
 - [ ] statefulset with PostgreSQL
 - [ ] alerting with prometheus to slack
@@ -41,6 +41,8 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] fix manual Circe codecs with withSnakeCaseMemberNames config
 - [ ] add gatling stress tests
 - [ ] add integration tests
+
+---
 
 ## Endpoints
 
@@ -74,6 +76,8 @@ TELEGRAM_API_TOKEN=123:xyz sbt app/run
 
 ## Deployment
 
+* [dockerhub](https://hub.docker.com/?namespace=niqdev)
+
 ```bash
 # build image
 sbt clean docker:publishLocal
@@ -86,4 +90,9 @@ docker run \
 
 # access container
 docker exec -it mobile-carrier-bot bash
+
+# publish
+docker login
+docker tag niqdev/mobile-carrier-bot-app:0.1 niqdev/mobile-carrier-bot-app:latest
+docker push niqdev/mobile-carrier-bot-app:latest
 ```
