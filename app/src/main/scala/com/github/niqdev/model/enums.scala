@@ -29,9 +29,9 @@ object Environment extends Enum[Environment] with EnvironmentInstances {
 
 }
 
-/**
-  * [[org.slf4j.event.Level LogLevel]]
-  */
+/*
+ * [[org.slf4j.event.Level LogLevel]]
+ */
 sealed trait LogLevel extends EnumEntry with Snakecase with Uppercase
 
 sealed trait LogLevelInstances {

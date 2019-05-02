@@ -72,11 +72,11 @@ object Settings extends SettingsInstances {
   import eu.timepit.refined.auto.autoRefineV
   import ciris.enumeratum.enumEntryConfigDecoder
 
-  // TODO move in case class or default parameter
+  // TODO move in case class or default parameter or remove completely
   private[this] val defaultLogLevel: LogLevel                      = LogLevel.Debug
   private[this] val defaultEnvironment: Environment                = Environment.Local
   private[this] val defaultPort: PortNumber                        = 8080
-  private[this] val defaultHost: NonEmptyString                    = "localhost"
+  private[this] val defaultHost: NonEmptyString                    = "0.0.0.0"
   private[this] val defaultTelegramApiToken: NonEmptyString        = "API_TOKEN"
   private[this] val defaultTelegramPolling: PosLong                = 5L
   private[this] val defaultDatabaseDriverClassName: DatabaseDriver = DatabaseDriver.Cache

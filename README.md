@@ -13,7 +13,8 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [x] skeleton, plugins, setup
 - [ ] architecture docs and diagrams
 - [x] healtcheck status/info/env
-- [ ] expose prometheus metrics
+- [ ] expose prometheus metrics via endpoint
+- [ ] expose JVM metrics via JMX
 - [ ] scalatest and scalacheck
 - [ ] codecov or alternatives
 - [x] telegram client (polling)
@@ -36,6 +37,7 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] alerting with prometheus to slack
 - [ ] grafana dashboard
 - [ ] backup/restore logs and metrics even if re-create cluster
+- [ ] generate and publish scaladoc
 
 ## Endpoints
 
@@ -48,7 +50,7 @@ http :8080/env
 
 ## Development
 
-```
+```bash
 # test
 sbt test -jvm-debug 5005
 
@@ -56,7 +58,7 @@ sbt test -jvm-debug 5005
 TELEGRAM_API_TOKEN=123:xyz sbt app/run
 ```
 
-### Sbt aliases
+### sbt aliases
 
 * `checkFormat` checks format
 * `format` formats sources
@@ -66,3 +68,19 @@ TELEGRAM_API_TOKEN=123:xyz sbt app/run
 ### Other sbt plugins
 
 * `dependencyTree` shows project dependencies
+
+## Deployment
+
+```bash
+# build image
+sbt clean docker:publishLocal
+
+# run temporary container
+docker run \
+  --rm \
+  --name mobile-carrier-bot \
+  niqdev/mobile-carrier-bot-app:0.1
+
+# access container
+docker exec -it mobile-carrier-bot bash
+```
