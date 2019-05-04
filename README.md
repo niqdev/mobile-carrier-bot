@@ -32,7 +32,8 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] constrain all types with refined where possible
 - [ ] travis + automate publish to dockerhub
 - [x] publish to dockerhub
-- [ ] create simple deployment k8s chart + argocd app
+- [x] create deployment k8s chart
+- [ ] create argocd app
 - [ ] statefulset with PostgreSQL
 - [ ] alerting with prometheus to slack
 - [ ] grafana dashboard
@@ -76,7 +77,7 @@ TELEGRAM_API_TOKEN=123:xyz sbt app/run
 
 ## Deployment
 
-* [dockerhub](https://hub.docker.com/?namespace=niqdev)
+* [dockerhub](https://hub.docker.com/u/niqdev)
 
 ```bash
 # build image
@@ -95,4 +96,23 @@ docker exec -it mobile-carrier-bot bash
 docker login
 docker tag niqdev/mobile-carrier-bot-app:0.1 niqdev/mobile-carrier-bot-app:latest
 docker push niqdev/mobile-carrier-bot-app:latest
+```
+
+### Charts
+
+* [Docs](https://helm.sh/docs/developing_charts/#charts)
+
+```bash
+# print chart
+helm template -f charts/app/values.yaml charts/app/
+
+# apply chart
+helm template -f charts/app/values.yaml charts/app/ | kubectl apply -f -
+
+# verify healtcheck
+kubectl port-forward deployment/<DEPLOYMENT_NAME> 8888:8080
+http :8888/status
+
+# logs
+kubectl logs <POD_NAME> -f
 ```

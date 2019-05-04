@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment
+kind: Deployment
+metadata:
+  name: {{ include "application.name" . }}
+  labels:
+    app: {{ include "application.name" . }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "application.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "application.name" . }}
+    spec:
+      containers:
+        - name: {{ include "application.name" . }}
+          # https://kubernetes.io/docs/concepts/configuration/overview/#container-images
+          image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.httpPort }}
+              protocol: TCP
+          {{- if .Values.env }}
+          # https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container
+          env:
+          {{- range $key, $value := .Values.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+          {{- end }}
+          # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes
+          # Kubernetes uses liveness probes to know when to restart a container
+          # e.g. if a container is unresponsive
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+          # Kubernetes uses readiness probes to decide when the container is available for accepting traffic
+          # A pod is considered ready when all of its containers are ready
+          # If a pod is not ready, it is removed from service load balancers
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+          {{- if .Values.resources }}
+          # https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          {{- end }}

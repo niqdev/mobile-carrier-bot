@@ -1,0 +1,30 @@
+app:
+  version: v0-1
+  replicas: 1
+  httpPort: 8080
+
+image:
+  repository: niqdev/mobile-carrier-bot-app
+  tag: latest
+  # default is IfNotPresent
+  pullPolicy: Always
+
+# com/github/niqdev/model/settings.scala
+env:
+  LOG_LEVEL: DEBUG
+  ENVIRONMENT: DEVELOPMENT
+#  HTTP_PORT: 8080
+#  HTTP_HOST: 0.0.0.0
+# FIXME secret manager operator to configMap
+#  TELEGRAM_API_TOKEN: API_TOKEN
+#  TELEGRAM_POLLING_SECONDS: 2
+#  DB_DRIVER: "cats.effect.concurrent.Ref"
+#  DB_URL: ""
+#  DB_USERNAME: ""
+#  DB_PASSWORD: ""
+#  DB_CONNECTION_POOL_SIZE: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
