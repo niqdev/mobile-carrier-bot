@@ -2,11 +2,12 @@ apiVersion: apps/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/deployment
 kind: Deployment
 metadata:
-  name: {{ include "application.name" . }}
+  name: {{ include "application.name" . }}-deployment
   labels:
     app: {{ include "application.name" . }}
 spec:
   replicas: {{ .Values.app.replicas }}
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: {{ include "application.name" . }}
@@ -16,13 +17,13 @@ spec:
         app: {{ include "application.name" . }}
     spec:
       containers:
-        - name: {{ include "application.name" . }}
+        - name: {{ .Chart.Name }}
           # https://kubernetes.io/docs/concepts/configuration/overview/#container-images
           image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.app.httpPort }}
+              containerPort: 8080
               protocol: TCP
           {{- if .Values.env }}
           # https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container

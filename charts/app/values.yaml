@@ -1,7 +1,7 @@
 app:
   version: v0-1
   replicas: 1
-  httpPort: 8080
+  httpPort: 8000
 
 image:
   repository: niqdev/mobile-carrier-bot-app
