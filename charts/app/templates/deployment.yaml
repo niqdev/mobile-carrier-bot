@@ -2,7 +2,7 @@ apiVersion: apps/v1
 # https://kubernetes.io/docs/concepts/workloads/controllers/deployment
 kind: Deployment
 metadata:
-  name: {{ include "application.name" . }}-deployment
+  name: {{ include "application.name" . }}
   labels:
     app: {{ include "application.name" . }}
 spec:
