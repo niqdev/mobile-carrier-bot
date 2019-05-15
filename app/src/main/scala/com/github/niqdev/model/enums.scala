@@ -30,7 +30,6 @@ object Environment extends Enum[Environment] with EnvironmentInstances {
   case object Local       extends Environment
   case object Development extends Environment
   case object Production  extends Environment
-
 }
 
 /*
@@ -57,7 +56,6 @@ object LogLevel extends Enum[LogLevel] with LogLevelInstances {
   case object Info  extends LogLevel
   case object Warn  extends LogLevel
   case object Error extends LogLevel
-
 }
 
 /**
