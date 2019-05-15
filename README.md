@@ -59,6 +59,8 @@ http :8080/env
 ```bash
 # test
 sbt test -jvm-debug 5005
+sbt "test:testOnly *HealthCheckEndpointsSpec"
+sbt "test:testOnly *HealthCheckEndpointsSpec -- -z statusEndpoint"
 
 # run with default
 TELEGRAM_API_TOKEN=123:xyz sbt app/run
