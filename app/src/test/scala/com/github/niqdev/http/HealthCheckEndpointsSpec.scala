@@ -4,9 +4,9 @@ package http
 import java.nio.charset.StandardCharsets
 
 import cats.effect.IO
-import com.github.niqdev.model.BuildInformation
+import com.github.niqdev.model.{BuildInformation, Settings}
 import com.github.niqdev.service.HealthCheckService
-import org.http4s.{ Method, Request, Status, Uri }
+import org.http4s.{Method, Request, Status, Uri}
 
 final class HealthCheckEndpointsSpec extends BaseSpec {
 
@@ -18,7 +18,7 @@ final class HealthCheckEndpointsSpec extends BaseSpec {
         .statusEndpoint
         .run(request)
         .value
-        .unsafeRunSync
+        .unsafeRunSync()
 
       maybeResponse match {
         case Some(response) =>
@@ -37,7 +37,7 @@ final class HealthCheckEndpointsSpec extends BaseSpec {
         .infoEndpoint(HealthCheckService())
         .run(request)
         .value
-        .unsafeRunSync
+        .unsafeRunSync()
 
       maybeResponse match {
         case Some(response) =>
@@ -54,6 +54,25 @@ final class HealthCheckEndpointsSpec extends BaseSpec {
             case _ =>
               fail("unexpected failure")
           }
+        case _ =>
+          fail("unexpected failure")
+      }
+    }
+
+    "verify envEndpoint" in {
+      val settings = Settings.load[IO].allocated.unsafeRunSync()._1
+      val request = Request[IO](method = Method.GET, uri = Uri.unsafeFromString("/env"))
+      val maybeResponse = HealthCheckEndpoints[IO]
+        .envEndpoint(settings)
+        .run(request)
+        .value
+        .unsafeRunSync()
+
+      maybeResponse match {
+        case Some(response) =>
+          response.status shouldBe Status.Ok
+
+          response.as[Settings].unsafeRunSync() shouldBe settings
         case _ =>
           fail("unexpected failure")
       }

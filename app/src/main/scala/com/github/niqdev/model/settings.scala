@@ -1,16 +1,16 @@
 package com.github.niqdev
 package model
 
-import cats.effect.{ Resource, Sync }
-import cats.{ Applicative, Show }
+import cats.effect.{Resource, Sync}
+import cats.{Applicative, Show}
 import ciris.cats.catsMonadErrorToCiris
 import ciris.refined.refTypeConfigDecoder
-import ciris.{ envF, loadConfig }
+import ciris.{envF, loadConfig}
 import eu.timepit.refined.types.net.PortNumber
-import eu.timepit.refined.types.numeric.{ PosInt, PosLong }
+import eu.timepit.refined.types.numeric.{PosInt, PosLong}
 import eu.timepit.refined.types.string.NonEmptyString
-import org.http4s.EntityEncoder
-import org.http4s.circe.jsonEncoderOf
+import org.http4s.{EntityDecoder, EntityEncoder}
+import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 
 final case class Settings(
   logLevel: LogLevel,
@@ -41,11 +41,15 @@ final case class DatabaseSettings(
 
 sealed trait SettingsInstances {
 
-  import io.circe.generic.auto.exportEncoder
+  import io.circe.generic.auto.{ exportEncoder, exportDecoder }
   import io.circe.refined.refinedEncoder
+  import io.circe.refined.refinedDecoder
 
   implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Settings] =
     jsonEncoderOf[F, Settings]
+
+  implicit def settingsEntityDecoder[F[_]: Sync]: EntityDecoder[F, Settings] =
+    jsonOf[F, Settings]
 
   implicit val settingsShow: Show[Settings] =
     (settings: Settings) => s"""
