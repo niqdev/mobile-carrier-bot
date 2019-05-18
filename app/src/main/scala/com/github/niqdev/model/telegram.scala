@@ -4,28 +4,19 @@ package model
 import cats.Applicative
 import cats.effect.Sync
 import enumeratum.{ Enum, EnumEntry }
+import io.circe.generic.extras.{ AutoDerivation, Configuration, ConfiguredJsonCodec }
 import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{ Decoder, Encoder, HCursor }
+import io.circe.{ Decoder, HCursor }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 
-/*
+// https://circe.github.io/circe/codecs/custom-codecs.html#custom-key-mappings-via-annotations
+// https://github.com/circe/circe/blob/master/modules/generic-extras/src/test/scala/io/circe/generic/extras/ConfiguredJsonCodecWithKeySuite.scala
+private[model] sealed trait CirceSnakeCaseConfiguration extends AutoDerivation {
 
-# FIXME
-https://github.com/circe/circe/blob/master/modules/generic-extras/src/test/scala/io/circe/generic/extras/ConfiguredJsonCodecWithKeySuite.scala
-
-import io.circe.generic.extras.{ Configuration, ConfiguredJsonCodec }
-import io.circe.parser._
-import io.circe.syntax._
-
-@ConfiguredJsonCodec
-finale case class Example()
-
-import io.circe.generic.extras.auto._
-
-implicit val snakeCase: Configuration = Configuration.default.withSnakeCaseMemberNames
-
-*/
+  implicit val snakeCase: Configuration =
+    Configuration.default.withSnakeCaseMemberNames
+}
 
 // TODO refined + enumeratum
 // TODO validation: ignore bot, default languageCode
@@ -40,6 +31,7 @@ implicit val snakeCase: Configuration = Configuration.default.withSnakeCaseMembe
   * @param username Optional. User‘s or bot’s username
   * @param languageCode Optional. IETF language tag of the user's language
   */
+@ConfiguredJsonCodec
 final case class User(
   id: Long,
   isBot: Boolean,
@@ -49,17 +41,7 @@ final case class User(
   languageCode: Option[String] = None
 )
 
-object User {
-
-  implicit val userDecoder: Decoder[User] =
-    Decoder.forProduct6(
-      "id",
-      "is_bot",
-      "first_name",
-      "last_name",
-      "username",
-      "language_code")(User.apply)
-}
+object User extends CirceSnakeCaseConfiguration
 
 // TODO refined + date (Instant or ZonedDateTime)
 /**
@@ -100,9 +82,7 @@ final case class Update(id: Long, message: Option[Message])
 object Update {
 
   implicit val updateDecoder: Decoder[Update] =
-    Decoder.forProduct2(
-      "update_id",
-      "message")(Update.apply)
+    Decoder.forProduct2("update_id", "message")(Update.apply)
 
   implicit val orderByUpdateId: Ordering[Update] =
     Ordering.by(_.id)
@@ -113,18 +93,13 @@ object Update {
   *
   * Contains information about why a request was unsuccessful.
   */
+@ConfiguredJsonCodec
 final case class ResponseParameters(
   migrateToChatId: Long,
   retryAfter: Long
 )
 
-object ResponseParameters {
-
-  implicit val responseParametersDecoder: Decoder[ResponseParameters] =
-    Decoder.forProduct2(
-      "migrate_to_chat_id",
-      "retry_after")(ResponseParameters.apply)
-}
+object ResponseParameters extends CirceSnakeCaseConfiguration
 
 /**
   * [[https://core.telegram.org/bots/api#making-requests Response]]
@@ -150,21 +125,17 @@ object Response {
 }
 
 // TODO parse_mode, reply_markup
+@ConfiguredJsonCodec
 final case class SendMessage(
   chatId: String,
   text: String
 )
 
-object SendMessage {
+object SendMessage extends CirceSnakeCaseConfiguration {
 
   // chat_id: Integer or String
   def apply(chatId: Long, text: String): SendMessage =
     SendMessage(s"$chatId", text)
-
-  implicit val sendMessageEncoder: Encoder[SendMessage] =
-    Encoder.forProduct2("chat_id", "text")(value =>
-      (value.chatId, value.text)
-    )
 
   implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
     jsonEncoderOf[F, SendMessage]

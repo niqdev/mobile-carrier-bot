@@ -14,8 +14,7 @@ final class HealthCheckEndpointsSpec extends BaseSpec {
 
     "verify statusEndpoint" in {
       val request = Request[IO](method = Method.GET, uri = Uri.unsafeFromString("/status"))
-      val maybeResponse = HealthCheckEndpoints[IO]
-        .statusEndpoint
+      val maybeResponse = HealthCheckEndpoints[IO].statusEndpoint
         .run(request)
         .value
         .unsafeRunSync()
@@ -48,7 +47,8 @@ final class HealthCheckEndpointsSpec extends BaseSpec {
               buildInformation.name shouldBe "mobile-carrier-bot"
               buildInformation.scalaVersion shouldBe "2.12.8"
 
-              buildInformation.version shouldBe "0.1"
+              // e.g. 102-c40a3439+20190518-1559
+              buildInformation.version.nonEmpty shouldBe true
               // e.g. 2019-05-15 18:17:03.286
               buildInformation.buildTime.nonEmpty shouldBe true
             case _ =>

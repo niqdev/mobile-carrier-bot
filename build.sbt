@@ -24,12 +24,20 @@ lazy val dockerSettings = Seq(
   //dockerExposedVolumes := Seq("/opt/docker/log")
 )
 
+lazy val compilerSettings = Seq(
+  // required by circe-generic-extras
+  addCompilerPlugin(
+    "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
+  )
+)
+
 lazy val app = (project in file("app"))
   .dependsOn(core % "compile->compile;test->test") // makes BaseSpec accessible
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(JavaAppPackaging)
   .settings(buildInfoSettings)
   .settings(dockerSettings)
+  .settings(compilerSettings)
   .settings(
     name := s"${I.name}-app",
     libraryDependencies ++= (appDependencies ++ sharedDependencies ++ testDependencies)
@@ -59,6 +67,5 @@ lazy val root = project
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
     addCommandAlias("format", ";scalafmtAll;scalafmtSbt"),
     addCommandAlias("update", ";dependencyUpdates;reload plugins;dependencyUpdates;reload return"),
-    // FIXME addCommandAlias("build", ";checkFormat;clean;test")
-    addCommandAlias("build", ";clean;test")
+    addCommandAlias("build", ";checkFormat;clean;test")
   )
