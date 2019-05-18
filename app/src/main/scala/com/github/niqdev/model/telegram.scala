@@ -5,8 +5,8 @@ import cats.Applicative
 import cats.effect.Sync
 import enumeratum.{ Enum, EnumEntry }
 import io.circe.generic.extras.{ AutoDerivation, Configuration, ConfiguredJsonCodec }
-import io.circe.generic.semiauto.deriveDecoder
-import io.circe.{ Decoder, HCursor }
+import io.circe.generic.semiauto.{ deriveDecoder, deriveEncoder }
+import io.circe.{ Decoder, Encoder, HCursor, Json }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 
@@ -61,6 +61,17 @@ final case class Message(
 
 object Message {
 
+  import io.circe.syntax.EncoderOps
+
+  implicit val messageEncoder: Encoder[Message] =
+    (message: Message) =>
+      Json.obj(
+        ("message_id", Json.fromLong(message.id)),
+        ("from", message.from.asJson),
+        ("date", message.date.asJson),
+        ("text", message.text.asJson)
+      )
+
   implicit val messageDecoder: Decoder[Message] =
     (c: HCursor) =>
       for {
@@ -80,6 +91,11 @@ object Message {
 final case class Update(id: Long, message: Option[Message])
 
 object Update {
+
+  implicit val updateEncoder: Encoder[Update] =
+    Encoder.forProduct2("update_id", "message") { update =>
+      (update.id, update.message)
+    }
 
   implicit val updateDecoder: Decoder[Update] =
     Decoder.forProduct2("update_id", "message")(Update.apply)
@@ -113,6 +129,12 @@ final case class Response[T](
 )
 
 object Response {
+
+  implicit def responseEncoder[T: Encoder]: Encoder[Response[T]] =
+    deriveEncoder[Response[T]]
+
+  implicit def responseEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Response[List[Update]]] =
+    jsonEncoderOf[F, Response[List[Update]]]
 
   implicit def responseDecoder[T: Decoder]: Decoder[Response[T]] =
     deriveDecoder[Response[T]]

@@ -26,16 +26,19 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       .unsafeFromString(s"${settings.baseUri}")
       .withPath(s"/bot${settings.apiToken.value}$path")
 
+  private[http] def findLastOffset(updates: List[Update]): Long =
+    updates.max.id
+
   /**
     * [[https://core.telegram.org/bots/api#getupdates getUpdates]]
     */
   private[http] def getUpdates(client: Client[F]): Long => F[Response[List[Update]]] =
-    offset =>
-      client
-        .expect[Response[List[Update]]](buildPath("/getUpdates").withQueryParam("offset", offset))
+    offset => {
+      val uri = buildPath("/getUpdates")
+        .withQueryParam("offset", offset)
 
-  private[http] def findLastOffset(updates: List[Update]): Long =
-    updates.max.id
+      client.expect[Response[List[Update]]](uri)
+    }
 
   /**
     * [[https://core.telegram.org/bots/api#sendmessage SendMessage]]
@@ -53,7 +56,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   private[http] def startPolling(
     repository: TelegramRepository[F, D],
     client: Client[F]
-  ) =
+  ): Stream[F, Response[Message]] =
     Stream
       .awakeEvery[F](settings.polling.value.seconds)
       .evalMap(_ => repository.getOffset)
@@ -85,7 +88,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       }
       .evalMap(sendMessage(client))
       .evalTap(logStream[Response[Message]])
-      .holdOptionResource
+
 }
 
 /**
@@ -105,7 +108,9 @@ object TelegramClient {
     client: Client[F]
   ) =
     for {
-      log    <- Resource.liftF(Slf4jLogger.create[F])
-      client <- apply(settings, log).startPolling(repository, client)
+      log <- Resource.liftF(Slf4jLogger.create[F])
+      client <- apply(settings, log)
+        .startPolling(repository, client)
+        .holdOptionResource
     } yield client
 }
