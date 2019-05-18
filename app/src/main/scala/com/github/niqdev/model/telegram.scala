@@ -142,9 +142,8 @@ object Response {
   implicit def responseDecoder[T: Decoder]: Decoder[Response[T]] =
     deriveDecoder[Response[T]]
 
-  // TODO List no Vector ???
-  implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Vector[Update]]] =
-    jsonOf[F, Response[Vector[Update]]]
+  implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[List[Update]]] =
+    jsonOf[F, Response[List[Update]]]
 
   implicit def responseMessage[F[_]: Sync]: EntityDecoder[F, Response[Message]] =
     jsonOf[F, Response[Message]]

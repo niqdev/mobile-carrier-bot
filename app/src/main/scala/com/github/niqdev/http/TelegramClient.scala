@@ -32,12 +32,12 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   /**
     * [[https://core.telegram.org/bots/api#getupdates getUpdates]]
     */
-  private[http] def getUpdates(client: Client[F]): Long => F[Response[Vector[Update]]] =
+  private[http] def getUpdates(client: Client[F]): Long => F[Response[List[Update]]] =
     offset =>
       client
-        .expect[Response[Vector[Update]]](buildPath("/getUpdates").withQueryParam("offset", offset))
+        .expect[Response[List[Update]]](buildPath("/getUpdates").withQueryParam("offset", offset))
 
-  private[http] def findLastOffset(updates: Vector[Update]): Long =
+  private[http] def findLastOffset(updates: List[Update]): Long =
     updates.max.id
 
   /**
@@ -61,7 +61,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       .awakeEvery[F](settings.polling.value.seconds)
       .evalMap(_ => repository.getOffset)
       .evalMap(getUpdates(client))
-      .evalMap(logStream[Response[Vector[Update]]])
+      .evalMap(logStream[Response[List[Update]]])
       // TODO remove collect and log errors e.g. attempt.observeEither
       .collect {
         // ignore invalid response

@@ -13,7 +13,8 @@ final class TelegramModelSpec extends BaseSpec {
           |{
           |  "id": 123456789,
           |  "is_bot": false,
-          |  "first_name": "MyFirstName"
+          |  "first_name": "MyFirstName",
+          |  "invalidKey": "InvalidValue"
           |}
         """.stripMargin).getOrElse(Json.Null)
 
@@ -123,7 +124,7 @@ final class TelegramModelSpec extends BaseSpec {
       val expectedResponse = Response(
         ok = true,
         result = Some(
-          Vector(
+          List(
             Update(
               id = 220544280,
               message = Some(
@@ -141,7 +142,7 @@ final class TelegramModelSpec extends BaseSpec {
           )
         )
       )
-      json.as[Response[Vector[Update]]] shouldBe Right(expectedResponse)
+      json.as[Response[List[Update]]] shouldBe Right(expectedResponse)
     }
 
   }
