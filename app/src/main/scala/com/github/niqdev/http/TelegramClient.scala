@@ -53,7 +53,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       client.expect[Response[Message]](request)
     }
 
-  def startPolling(
+  private[http] def startPolling(
     repository: TelegramRepository[F, D],
     client: Client[F]
   ) =
