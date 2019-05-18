@@ -1,5 +1,10 @@
 # mobile-carrier-bot
 
+[![Build Status][travis-image]][travis-url]
+
+[travis-image]: https://travis-ci.org/niqdev/mobile-carrier-bot.svg?branch=master
+[travis-url]: https://travis-ci.org/niqdev/mobile-carrier-bot
+
 A bot to access mobile carrier services implemented on top of the Typelevel stack using Tagless Final style
 
 ---
@@ -30,7 +35,8 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] [slate](https://lord.github.io/slate) static site for api
 - [ ] [gitpitch](https://gitpitch.com) for 5@4 presentation
 - [ ] constrain all types with refined where possible
-- [ ] travis + automate publish to dockerhub
+- [ ] travis
+- [x] travis automate publish to dockerhub
 - [x] publish to dockerhub
 - [x] create deployment k8s chart
 - [ ] create argocd app
