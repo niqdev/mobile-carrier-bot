@@ -18,12 +18,9 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   log: Logger[F]
 ) {
 
-  // TODO evalTap
-  private[http] def logStream[T]: T => F[T] =
-    (t: T) => log.debug(s"$t").map(_ => t)
+  private[http] def logStream[T]: T => F[Unit] =
+    (t: T) => log.debug(s"$t")
 
-  // FIXME exception during macro expansion: uri"${settings.baseUri}"
-  // import org.http4s.Http4sLiteralSyntax
   private[http] def buildPath(path: String): Uri =
     Uri
       .unsafeFromString(s"${settings.baseUri}")
@@ -61,7 +58,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       .awakeEvery[F](settings.polling.value.seconds)
       .evalMap(_ => repository.getOffset)
       .evalMap(getUpdates(client))
-      .evalMap(logStream[Response[List[Update]]])
+      .evalTap(logStream[Response[List[Update]]])
       // TODO remove collect and log errors e.g. attempt.observeEither
       .collect {
         // ignore invalid response
@@ -77,7 +74,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       }
       // flatten: Stream[F, Seq[T]] ==> Stream[F, T]
       .flatMap(Stream.emits)
-      .evalMap(logStream[Update])
+      .evalTap(logStream[Update])
       .collect {
         // ignore invalid message
         case Update(_, Some(Message(_, Some(user), _, Some(text)))) =>
@@ -87,7 +84,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
           )
       }
       .evalMap(sendMessage(client))
-      .evalMap(logStream[Response[Message]])
+      .evalTap(logStream[Response[Message]])
       .holdOptionResource
 }
 

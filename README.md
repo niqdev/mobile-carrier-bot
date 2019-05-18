@@ -35,8 +35,8 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] [slate](https://lord.github.io/slate) static site for api
 - [ ] [gitpitch](https://gitpitch.com) for 5@4 presentation
 - [ ] constrain all types with refined where possible
-- [ ] travis
-- [x] travis automate publish to dockerhub
+- [x] travis
+- [ ] travis automate publish to dockerhub
 - [x] publish to dockerhub
 - [x] create deployment k8s chart
 - [ ] create argocd app
@@ -45,7 +45,7 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] grafana dashboard
 - [ ] backup/restore logs and metrics even if re-create cluster
 - [ ] generate and publish scaladoc
-- [ ] fix manual Circe codecs with withSnakeCaseMemberNames config
+- [x] fix manual Circe codecs with withSnakeCaseMemberNames config
 - [ ] add gatling stress tests
 - [ ] add integration tests
 
