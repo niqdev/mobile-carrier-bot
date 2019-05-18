@@ -5,8 +5,6 @@ lazy val I = new {
   val organization = "com.github.niqdev"
   val name         = "mobile-carrier-bot"
   val scalaVersion = "2.12.8"
-  // TODO sbt-dynver
-  val version = "0.1"
 }
 
 lazy val buildInfoSettings = Seq(
@@ -27,8 +25,7 @@ lazy val dockerSettings = Seq(
 )
 
 lazy val app = (project in file("app"))
-  // makes BaseSpec accessible
-  .dependsOn(core % "compile->compile;test->test")
+  .dependsOn(core % "compile->compile;test->test") // makes BaseSpec accessible
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(JavaAppPackaging)
   .settings(buildInfoSettings)
@@ -56,8 +53,7 @@ lazy val root = project
     inThisBuild(
       List(
         organization := I.organization,
-        scalaVersion := I.scalaVersion,
-        version      := I.version
+        scalaVersion := I.scalaVersion
       )
     ),
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
