@@ -133,16 +133,19 @@ object Response {
   implicit def responseEncoder[T: Encoder]: Encoder[Response[T]] =
     deriveEncoder[Response[T]]
 
-  implicit def responseEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Response[List[Update]]] =
-    jsonEncoderOf[F, Response[List[Update]]]
-
   implicit def responseDecoder[T: Decoder]: Decoder[Response[T]] =
     deriveDecoder[Response[T]]
+
+  implicit def responseEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Response[List[Update]]] =
+    jsonEncoderOf[F, Response[List[Update]]]
 
   implicit def responseEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[List[Update]]] =
     jsonOf[F, Response[List[Update]]]
 
-  implicit def responseMessage[F[_]: Sync]: EntityDecoder[F, Response[Message]] =
+  implicit def messageEntityEncoder[F[_]: Applicative]: EntityEncoder[F, Response[Message]] =
+    jsonEncoderOf[F, Response[Message]]
+
+  implicit def messageEntityDecoder[F[_]: Sync]: EntityDecoder[F, Response[Message]] =
     jsonOf[F, Response[Message]]
 }
 

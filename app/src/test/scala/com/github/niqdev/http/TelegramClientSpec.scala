@@ -3,10 +3,10 @@ package http
 
 import cats.effect.{ IO, Sync }
 import com.github.ghik.silencer.silent
-import com.github.niqdev.model.{ DatabaseDriver, TelegramSettings, Update }
+import com.github.niqdev.model.{ DatabaseDriver, Message, SendMessage, TelegramSettings, Update }
 import io.chrisdavenport.log4cats.Logger
 import org.http4s.client.Client
-import org.http4s.{ HttpApp, Method, Response, Status }
+import org.http4s.{ HttpApp, Method, Request, Response, Status }
 
 import scala.concurrent.ExecutionContext
 
@@ -31,6 +31,14 @@ final class TelegramClientSpec extends BaseSpec {
       override def debug(message: =>String): F[Unit] =
         Sync[F].unit
     }
+
+  private[this] def verifyHttpRequest[F[_]: Sync](f: Request[F] => Response[F]): Client[F] = {
+    import cats.implicits.catsSyntaxApplicativeId
+
+    Client.fromHttpApp(HttpApp[F] { request =>
+      f(request).pure[F]
+    })
+  }
 
   "TelegramClient" must {
 
@@ -77,18 +85,43 @@ final class TelegramClientSpec extends BaseSpec {
     }
 
     "verify getUpdates" in {
-      import cats.implicits.catsSyntaxApplicativeId
       import org.http4s.Http4sLiteralSyntax
 
-      val client = Client.fromHttpApp(HttpApp[IO] { request =>
+      val offset = 8L
+      val response = model.Response(
+        ok = true,
+        result = Some(List(Update(8, None)))
+      )
+      val client: Client[IO] = verifyHttpRequest[IO] { request =>
         request.method shouldBe Method.GET
         request.uri shouldBe uri"https://api.telegram.org/bot123:xyz/getUpdates?offset=8"
+        Response[IO](Status.Ok).withEntity[model.Response[List[Update]]](response)
+      }
 
-        Response[IO](Status.Ok).pure[IO]
-      })
+      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
+        .getUpdates(client)(offset)
+        .unsafeRunSync()
 
+      result shouldBe response
+    }
+
+    "verify sendMessage" in {
+      import org.http4s.Http4sLiteralSyntax
+
+      val sendMessage = SendMessage(3L, "myText")
+      val response = model.Response(
+        ok = true,
+        result = Some(Message(id = 1L, date = 999L))
+      )
+      val client = verifyHttpRequest[IO] { request =>
+        request.method shouldBe Method.POST
+        request.uri shouldBe uri"https://api.telegram.org/bot123:xyz/sendMessage"
+        Response[IO](Status.Ok).withEntity(response)
+      }
+
+      // TODO
       TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
-        .getUpdates(client)(8L)
+        .sendMessage(client)(sendMessage)
         .unsafeRunSync()
     }
 
