@@ -1,15 +1,15 @@
 package com.github.niqdev
 package model
 
-import cats.effect.{Resource, Sync}
-import cats.{Applicative, Show}
+import cats.effect.{ Resource, Sync }
+import cats.{ Applicative, Show }
 import ciris.cats.catsMonadErrorToCiris
 import ciris.refined.refTypeConfigDecoder
-import ciris.{envF, loadConfig}
+import ciris.{ envF, loadConfig }
 import eu.timepit.refined.types.net.PortNumber
-import eu.timepit.refined.types.numeric.{PosInt, PosLong}
+import eu.timepit.refined.types.numeric.{ PosInt, PosLong }
 import eu.timepit.refined.types.string.NonEmptyString
-import org.http4s.{EntityDecoder, EntityEncoder}
+import org.http4s.{ EntityDecoder, EntityEncoder }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 
 final case class Settings(
