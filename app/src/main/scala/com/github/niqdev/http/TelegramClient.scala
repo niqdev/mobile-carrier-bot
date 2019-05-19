@@ -1,15 +1,15 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{ ConcurrentEffect, Resource, Timer }
+import cats.effect.{ConcurrentEffect, Resource, Sync, Timer}
 import cats.syntax.functor.toFunctorOps
 import com.github.niqdev.model._
 import com.github.niqdev.repository.TelegramRepository
-import fs2.{ Pipe, Stream }
+import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
-import org.http4s.{ Method, Request, Uri }
+import org.http4s.{Method, Request, Uri}
 
 import scala.concurrent.duration.DurationLong
 
@@ -41,7 +41,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
     }
 
   /**
-    * [[https://core.telegram.org/bots/api#sendmessage SendMessage]]
+    * [[https://core.telegram.org/bots/api#sendmessage sendMessage]]
     */
   private[http] def sendMessage(client: Client[F]): SendMessage => F[Response[Message]] =
     message => {
@@ -54,16 +54,16 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
     }
 
   // TODO test
-  def collectUpdates: Pipe[F, Response[List[Update]], (Long, List[Update])] =
-    updateStream =>
-      updateStream
+  private[http] def collectUpdates: Pipe[F, Response[List[Update]], (Long, List[Update])] =
+    updatesStream =>
+      updatesStream
         .map {
           case Response(true, _, Some(updates), None, None) if updates.nonEmpty =>
-            Right((findLastOffset(updates), updates))
+            Right(findLastOffset(updates) -> updates)
           case response @ Response(true, _, Some(updates), _, _) if updates.isEmpty =>
             Left(s"empty Response[List[Update]]: $response")
           case response =>
-            Left(s"bad Response[List[Update]]: $response")
+            Left(s"invalid Response[List[Update]]: $response")
         }
         .evalTap {
           case Right(response) =>
@@ -75,6 +75,31 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
         }
         .collect {
           // filter valid updates
+          case Right(result) => result
+        }
+
+  // TODO test
+  private[http] def collectMessage: Pipe[F, Update, SendMessage] =
+    updateStream =>
+      updateStream
+        .map {
+          case Update(_, Some(Message(_, Some(user), _, Some(text)))) =>
+            // TODO
+            Right(SendMessage(
+              user.id,
+              BotCommand.parseCommand(text)
+            ))
+          case update =>
+            Left(s"invalid Update: $update")
+        }
+        .evalTap {
+          case Right(_) =>
+            Sync[F].unit
+          case Left(result) =>
+            log.warn(result)
+        }
+        .collect {
+          // filter valid message
           case Right(result) => result
         }
 
@@ -100,14 +125,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       // flatten: Stream[F, Seq[T]] ==> Stream[F, T]
       .flatMap(Stream.emits)
       .evalTap(logDebug[Update])
-      .collect {
-        // ignore invalid message
-        case Update(_, Some(Message(_, Some(user), _, Some(text)))) =>
-          SendMessage(
-            user.id,
-            BotCommand.parseCommand(text)
-          )
-      }
+      .through(collectMessage)
       .evalMap(sendMessage(client))
       .evalTap(logDebug[Response[Message]])
 
