@@ -1,15 +1,15 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{ConcurrentEffect, Resource, Sync, Timer}
+import cats.effect.{ ConcurrentEffect, Resource, Sync, Timer }
 import cats.syntax.functor.toFunctorOps
 import com.github.niqdev.model._
 import com.github.niqdev.repository.TelegramRepository
-import fs2.{Pipe, Stream}
+import fs2.{ Pipe, Stream }
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
-import org.http4s.{Method, Request, Uri}
+import org.http4s.{ Method, Request, Uri }
 
 import scala.concurrent.duration.DurationLong
 
@@ -53,9 +53,8 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       client.expect[Response[Message]](request)
     }
 
-  // TODO test
   private[http] def collectUpdates: Pipe[F, Response[List[Update]], (Long, List[Update])] =
-    updatesStream =>
+    (updatesStream: Stream[F, Response[List[Update]]]) =>
       updatesStream
         .map {
           case Response(true, _, Some(updates), None, None) if updates.nonEmpty =>
@@ -85,10 +84,12 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
         .map {
           case Update(_, Some(Message(_, Some(user), _, Some(text)))) =>
             // TODO
-            Right(SendMessage(
-              user.id,
-              BotCommand.parseCommand(text)
-            ))
+            Right(
+              SendMessage(
+                user.id,
+                BotCommand.parseCommand(text)
+              )
+            )
           case update =>
             Left(s"invalid Update: $update")
         }
