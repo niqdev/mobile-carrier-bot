@@ -5,7 +5,7 @@ import cats.effect.{ ConcurrentEffect, Resource, Timer }
 import cats.syntax.functor.toFunctorOps
 import com.github.niqdev.model._
 import com.github.niqdev.repository.TelegramRepository
-import fs2.Stream
+import fs2.{ Pipe, Stream }
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.client.Client
@@ -18,7 +18,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
   log: Logger[F]
 ) {
 
-  private[http] def logStream[T]: T => F[Unit] =
+  private[http] def logDebug[T]: T => F[Unit] =
     (t: T) => log.debug(s"$t")
 
   private[http] def buildPath(path: String): Uri =
@@ -53,6 +53,31 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       client.expect[Response[Message]](request)
     }
 
+  // TODO test
+  def collectUpdates: Pipe[F, Response[List[Update]], (Long, List[Update])] =
+    updateStream =>
+      updateStream
+        .map {
+          case Response(true, _, Some(updates), None, None) if updates.nonEmpty =>
+            Right((findLastOffset(updates), updates))
+          case response @ Response(true, _, Some(updates), _, _) if updates.isEmpty =>
+            Left(s"empty Response[List[Update]]: $response")
+          case response =>
+            Left(s"bad Response[List[Update]]: $response")
+        }
+        .evalTap {
+          case Right(response) =>
+            log.debug(s"new Response[List[Update]]: [offset=${response._1}][size=${response._2.size}]")
+          case Left(response) if response.startsWith("empty") =>
+            log.debug(response)
+          case Left(response) =>
+            log.error(response)
+        }
+        .collect {
+          // filter valid updates
+          case Right(result) => result
+        }
+
   private[http] def startPolling(
     repository: TelegramRepository[F, D],
     client: Client[F]
@@ -61,13 +86,10 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       .awakeEvery[F](settings.polling.value.seconds)
       .evalMap(_ => repository.getOffset)
       .evalMap(getUpdates(client))
-      .evalTap(logStream[Response[List[Update]]])
-      // TODO remove collect and log errors e.g. attempt.observeEither
-      .collect {
-        // ignore invalid response
-        case Response(true, _, Some(updates), _, _) if updates.nonEmpty =>
-          (findLastOffset(updates), updates)
-      }
+      .through(collectUpdates)
+      // offset should be updated after processing or only after a successful response?
+      // what if there is a huge backlog and the service was done for long time?
+      // in this case a user would receive responses to obsolete requests
       .evalMap {
         // TODO move in service
         case (lastOffset, updates) =>
@@ -77,7 +99,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
       }
       // flatten: Stream[F, Seq[T]] ==> Stream[F, T]
       .flatMap(Stream.emits)
-      .evalTap(logStream[Update])
+      .evalTap(logDebug[Update])
       .collect {
         // ignore invalid message
         case Update(_, Some(Message(_, Some(user), _, Some(text)))) =>
@@ -87,7 +109,7 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
           )
       }
       .evalMap(sendMessage(client))
-      .evalTap(logStream[Response[Message]])
+      .evalTap(logDebug[Response[Message]])
 
 }
 

@@ -43,7 +43,7 @@ final class TelegramClientSpec extends BaseSpec {
 
   "TelegramClient" must {
 
-    "verify logStream" in {
+    "verify logDebug" in {
       def verifyDebugLogger[F[_]: Sync](expected: String) =
         new DebugLogger[F]() {
           override def debug(message: =>String): F[Unit] =
@@ -56,7 +56,7 @@ final class TelegramClientSpec extends BaseSpec {
       val message = "myDebugLog"
 
       TelegramClient[IO, DatabaseDriver.Cache](settings, verifyDebugLogger(message))
-        .logStream(message)
+        .logDebug(message)
         .unsafeRunSync()
     }
 
