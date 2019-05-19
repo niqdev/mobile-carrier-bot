@@ -3,7 +3,8 @@ package http
 
 import cats.effect.{ IO, Sync }
 import com.github.ghik.silencer.silent
-import com.github.niqdev.model.{ DatabaseDriver, Message, SendMessage, TelegramSettings, Update }
+import com.github.niqdev.model._
+import com.github.niqdev.repository.TelegramRepository
 import io.chrisdavenport.log4cats.Logger
 import org.http4s.client.Client
 import org.http4s.{ HttpApp, Method, Request, Response, Status }
@@ -113,50 +114,75 @@ final class TelegramClientSpec extends BaseSpec {
         ok = true,
         result = Some(Message(id = 1L, date = 999L))
       )
-      val client = verifyHttpRequest[IO] { request =>
+      val client: Client[IO] = verifyHttpRequest[IO] { request =>
         request.method shouldBe Method.POST
         request.uri shouldBe uri"https://api.telegram.org/bot123:xyz/sendMessage"
         Response[IO](Status.Ok).withEntity(response)
       }
 
-      // TODO
-      TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
+      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
         .sendMessage(client)(sendMessage)
         .unsafeRunSync()
+
+      result shouldBe response
     }
 
-    /*
     "verify startPolling" in {
       val repository = TelegramRepository[IO, DatabaseDriver.Cache]
+
+      val getUpdatesResponse = model.Response(
+        ok = true,
+        result = Some(
+          List(
+            Update(
+              8,
+              Some(
+                Message(
+                  id = 1L,
+                  from = Some(User(1L, false, "test")),
+                  date = 1L,
+                  text = Some("myValue")
+                )
+              )
+            )
+          )
+        )
+      )
+
+      val sendMessageResponse = model.Response(
+        ok = true,
+        result = Some(Message(id = 1L, date = 1L))
+      )
 
       def httpClient[F[_]: Sync]: Client[F] = {
         import cats.implicits.catsSyntaxApplicativeId
 
-        val response = model.Response(
-          ok = true,
-          result = Some(List(Update(8, None)))
-        )
-
         val app = HttpApp[F] {
           case request if request.pathInfo.contains("getUpdates") =>
-            request.params("offset") shouldBe "myOffset"
+            Response[F](Status.Ok)
+              .withEntity(getUpdatesResponse)
+              .pure[F]
 
-            Response[F](Status.Ok).withEntity(response).pure[F]
+          case request if request.pathInfo.contains("sendMessage") =>
+            Response[F](Status.Ok)
+              .withEntity(sendMessageResponse)
+              .pure[F]
         }
         Client.fromHttpApp(app)
       }
 
-      val messageResponse = TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
-        .startPolling(repository, httpClient())
+      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
+        .startPolling(repository, httpClient[IO])
         .take(1)
         .compile
         .toList
         .unsafeRunSync()
         .head
 
-      messageResponse shouldBe "aaa"
+      result shouldBe sendMessageResponse
+      repository.getOffset.unsafeRunSync() shouldBe 9
     }
-   */
+
   }
 }
 

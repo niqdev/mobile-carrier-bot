@@ -3,7 +3,6 @@ package repository
 
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
-import cats.syntax.flatMap.toFlatMapOps
 import com.github.niqdev.model.DatabaseDriver
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -29,19 +28,20 @@ sealed trait TelegramRepositoryInstances {
   implicit def cacheTelegramRepository[F[_]: Sync]: TelegramRepository[F, DatabaseDriver.Cache] =
     new TelegramRepository[F, DatabaseDriver.Cache] {
 
+      import cats.syntax.flatMap.catsSyntaxFlatMapOps
+
       // preserve referential transparency since constructor is private
-      private val ref: Ref[F, Long] =
+      private[this] val ref: Ref[F, Long] =
         Ref.unsafe[F, Long](0)
 
+      private[this] def logDebug(value: String): F[Unit] =
+        Logger[F].debug(s"[DatabaseDriver.Cache]: $value")
+
       override def setOffset(offset: Long): F[Unit] =
-        Sync[F]
-          .defer(Logger[F].debug(s"[DatabaseDriver.Cache]: setOffset: $offset"))
-          .flatMap(_ => ref.set(offset))
+        Sync[F].defer(logDebug(s"setOffset: $offset")) >> ref.set(offset)
 
       override def getOffset: F[Long] =
-        Sync[F]
-          .defer(Logger[F].debug(s"[DatabaseDriver.Cache]: getOffset: ${ref.get}"))
-          .flatMap(_ => ref.get)
+        Sync[F].defer(logDebug(s"getOffset: ${ref.get}")) >> ref.get
     }
 
 }
