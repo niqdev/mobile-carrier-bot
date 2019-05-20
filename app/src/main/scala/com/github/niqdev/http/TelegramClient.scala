@@ -77,7 +77,6 @@ sealed abstract class TelegramClient[F[_]: ConcurrentEffect: Timer, D](
           case Right(result) => result
         }
 
-  // TODO test
   private[http] def collectMessage: Pipe[F, Update, SendMessage] =
     updateStream =>
       updateStream

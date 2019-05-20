@@ -1,12 +1,12 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{ IO, Sync }
+import cats.effect.{IO, Sync}
 import com.github.niqdev.model._
 import com.github.niqdev.repository.TelegramRepository
 import fs2.Stream
 import org.http4s.client.Client
-import org.http4s.{ HttpApp, Method, Request, Response, Status }
+import org.http4s.{HttpApp, Method, Request, Response, Status}
 
 import scala.concurrent.ExecutionContext
 
@@ -27,10 +27,7 @@ final class TelegramClientSpec extends BaseSpec {
   }
 
   private[this] def logger[F[_]: Sync] =
-    new TestLogger[F]() {
-      override def debug(message: =>String): F[Unit] =
-        Sync[F].unit
-    }
+    new TestLogger[F]() {}
 
   private[this] def verifyHttpRequest[F[_]: Sync](f: Request[F] => Response[F]): Client[F] = {
     import cats.implicits.catsSyntaxApplicativeId
@@ -141,7 +138,7 @@ final class TelegramClientSpec extends BaseSpec {
           )
         )
       )
-      val getUpdatesResponse = model.Response(
+      val updatesResponse = model.Response(
         ok = true,
         result = Some(expectedUpdates)
       )
@@ -156,7 +153,7 @@ final class TelegramClientSpec extends BaseSpec {
         }
 
       val (offset, updates) = TelegramClient[IO, DatabaseDriver.Cache](settings, verifyLogger[IO])
-        .collectUpdates(Stream.eval(IO(getUpdatesResponse)))
+        .collectUpdates(Stream.eval(IO(updatesResponse)))
         .take(1)
         .compile
         .toList
@@ -168,7 +165,7 @@ final class TelegramClientSpec extends BaseSpec {
     }
 
     "verify collectUpdates: empty response" in {
-      val getUpdatesResponse = model.Response(
+      val updatesResponse = model.Response(
         ok = true,
         result = Some(List.empty[Update])
       )
@@ -184,7 +181,7 @@ final class TelegramClientSpec extends BaseSpec {
 
       val result: List[(Long, List[Update])] =
         TelegramClient[IO, DatabaseDriver.Cache](settings, verifyLogger[IO])
-          .collectUpdates(Stream.eval(IO(getUpdatesResponse)))
+          .collectUpdates(Stream.eval(IO(updatesResponse)))
           .take(1)
           .compile
           .toList
@@ -194,7 +191,7 @@ final class TelegramClientSpec extends BaseSpec {
     }
 
     "verify collectUpdates: invalid response" in {
-      val getUpdatesResponse = model.Response[List[Update]](
+      val updatesResponse = model.Response[List[Update]](
         ok = false,
         description = Some("myDescription"),
         errorCode = Some(1L),
@@ -212,7 +209,7 @@ final class TelegramClientSpec extends BaseSpec {
 
       val result: List[(Long, List[Update])] =
         TelegramClient[IO, DatabaseDriver.Cache](settings, verifyLogger[IO])
-          .collectUpdates(Stream.eval(IO(getUpdatesResponse)))
+          .collectUpdates(Stream.eval(IO(updatesResponse)))
           .take(1)
           .compile
           .toList
@@ -221,7 +218,78 @@ final class TelegramClientSpec extends BaseSpec {
       result.isEmpty shouldBe true
     }
 
+    "verify collectMessage: valid message" in {
+      val update = Update(
+        8,
+        Some(
+          Message(
+            id = 1L,
+            from = Some(User(2L, false, "test")),
+            date = 3L,
+            text = Some(BotCommand.Start.entryName)
+          )
+        )
+      )
+
+      def verifyLogger[F[_]: Sync] =
+        new TestLogger[F]() {
+          override def warn(message: =>String): F[Unit] =
+            Sync[F].defer {
+              message shouldBe "invalid Update"
+              Sync[F].unit
+            }
+        }
+
+      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, verifyLogger[IO])
+        .collectMessage(Stream.eval(IO(update)))
+        .take(1)
+        .compile
+        .toList
+        .unsafeRunSync()
+        .head
+
+      result shouldBe SendMessage(2L, "TODO start")
+    }
+
+    "verify collectMessage: invalid message" in {
+      val update = Update(
+        8,
+        Some(
+          Message(
+            id = 1L,
+            from = None,
+            date = 3L,
+            text = None
+          )
+        )
+      )
+
+      def verifyLogger[F[_]: Sync] =
+        new TestLogger[F]() {
+          override def warn(message: =>String): F[Unit] =
+            Sync[F].defer {
+              message shouldBe "invalid Update: Update(8,Some(Message(1,None,3,None)))"
+              Sync[F].unit
+            }
+        }
+
+      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, verifyLogger[IO])
+        .collectMessage(Stream.eval(IO(update)))
+        .take(1)
+        .compile
+        .toList
+        .unsafeRunSync()
+
+      result.isEmpty shouldBe true
+    }
+
     "verify startPolling" in {
+      def ignoreDebugLogger[F[_]: Sync] =
+        new TestLogger[F]() {
+          override def debug(message: =>String): F[Unit] =
+            Sync[F].unit
+        }
+
       val repository = TelegramRepository[IO, DatabaseDriver.Cache]
 
       val getUpdatesResponse = model.Response(
@@ -265,7 +333,7 @@ final class TelegramClientSpec extends BaseSpec {
         Client.fromHttpApp(app)
       }
 
-      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
+      val result = TelegramClient[IO, DatabaseDriver.Cache](settings, ignoreDebugLogger[IO])
         .startPolling(repository, httpClient[IO])
         .take(1)
         .compile
