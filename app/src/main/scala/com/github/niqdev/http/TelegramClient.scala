@@ -4,6 +4,7 @@ package http
 import cats.effect.{ ConcurrentEffect, Resource, Sync, Timer }
 import cats.syntax.functor.toFunctorOps
 import com.github.niqdev.model._
+import com.github.niqdev.model.telegram.{ BotCommand, Message, Response, SendMessage, Update }
 import com.github.niqdev.repository.TelegramRepository
 import fs2.{ Pipe, Stream }
 import io.chrisdavenport.log4cats.Logger

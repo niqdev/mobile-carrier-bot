@@ -1,12 +1,13 @@
 package com.github.niqdev
 package http
 
-import cats.effect.{IO, Sync}
-import com.github.niqdev.model._
+import cats.effect.{ IO, Sync }
+import com.github.niqdev.model.telegram.{ BotCommand, Message, ResponseParameters, SendMessage, Update, User }
+import com.github.niqdev.model.{ telegram, _ }
 import com.github.niqdev.repository.TelegramRepository
 import fs2.Stream
 import org.http4s.client.Client
-import org.http4s.{HttpApp, Method, Request, Response, Status}
+import org.http4s.{ HttpApp, Method, Request, Response, Status }
 
 import scala.concurrent.ExecutionContext
 
@@ -85,14 +86,14 @@ final class TelegramClientSpec extends BaseSpec {
       import org.http4s.Http4sLiteralSyntax
 
       val offset = 8L
-      val response = model.Response(
+      val response = telegram.Response(
         ok = true,
         result = Some(List(Update(8, None)))
       )
       val client: Client[IO] = verifyHttpRequest[IO] { request =>
         request.method shouldBe Method.GET
         request.uri shouldBe uri"https://api.telegram.org/bot123:xyz/getUpdates?offset=8"
-        Response[IO](Status.Ok).withEntity[model.Response[List[Update]]](response)
+        Response[IO](Status.Ok).withEntity[telegram.Response[List[Update]]](response)
       }
 
       val result = TelegramClient[IO, DatabaseDriver.Cache](settings, logger[IO])
@@ -106,7 +107,7 @@ final class TelegramClientSpec extends BaseSpec {
       import org.http4s.Http4sLiteralSyntax
 
       val sendMessage = SendMessage(3L, "myText")
-      val response = model.Response(
+      val response = telegram.Response(
         ok = true,
         result = Some(Message(id = 1L, date = 999L))
       )
@@ -138,7 +139,7 @@ final class TelegramClientSpec extends BaseSpec {
           )
         )
       )
-      val updatesResponse = model.Response(
+      val updatesResponse = telegram.Response(
         ok = true,
         result = Some(expectedUpdates)
       )
@@ -165,7 +166,7 @@ final class TelegramClientSpec extends BaseSpec {
     }
 
     "verify collectUpdates: empty response" in {
-      val updatesResponse = model.Response(
+      val updatesResponse = telegram.Response(
         ok = true,
         result = Some(List.empty[Update])
       )
@@ -191,7 +192,7 @@ final class TelegramClientSpec extends BaseSpec {
     }
 
     "verify collectUpdates: invalid response" in {
-      val updatesResponse = model.Response[List[Update]](
+      val updatesResponse = telegram.Response[List[Update]](
         ok = false,
         description = Some("myDescription"),
         errorCode = Some(1L),
@@ -292,7 +293,7 @@ final class TelegramClientSpec extends BaseSpec {
 
       val repository = TelegramRepository[IO, DatabaseDriver.Cache]
 
-      val getUpdatesResponse = model.Response(
+      val getUpdatesResponse = telegram.Response(
         ok = true,
         result = Some(
           List(
@@ -311,7 +312,7 @@ final class TelegramClientSpec extends BaseSpec {
         )
       )
 
-      val sendMessageResponse = model.Response(
+      val sendMessageResponse = telegram.Response(
         ok = true,
         result = Some(Message(id = 1L, date = 1L))
       )

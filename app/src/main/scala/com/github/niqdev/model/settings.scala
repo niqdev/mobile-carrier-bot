@@ -25,6 +25,7 @@ final case class ServerSettings(
   host: NonEmptyString
 )
 
+// TODO move in telegram package
 final case class TelegramSettings(
   apiToken: NonEmptyString,
   polling: PosLong,

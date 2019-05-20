@@ -1,5 +1,6 @@
 package com.github.niqdev
 package model
+package telegram
 
 import cats.Applicative
 import cats.effect.Sync
