@@ -1,6 +1,5 @@
 package com.github.niqdev
 package model
-package telegram
 
 import cats.Applicative
 import cats.effect.Sync
@@ -150,11 +149,18 @@ object Response {
     jsonOf[F, Response[Message]]
 }
 
-// TODO parse_mode, reply_markup
+/**
+  * [[https://core.telegram.org/bots/api#sendmessage SendMessage]]
+  */
 @ConfiguredJsonCodec
 final case class SendMessage(
   chatId: String,
-  text: String
+  text: String,
+  // TODO enumeratum: Markdown or HTML
+  parseMode: Option[String] = None,
+  replyToMessageId: Option[Long] = None,
+  // TODO enumeratum: InlineKeyboardMarkup or ReplyKeyboardMarkup or ReplyKeyboardRemove or ForceReply
+  replyMarkup: Option[String] = None
 )
 
 object SendMessage extends CirceSnakeCaseConfiguration {
@@ -163,10 +169,11 @@ object SendMessage extends CirceSnakeCaseConfiguration {
   def apply(chatId: Long, text: String): SendMessage =
     SendMessage(s"$chatId", text)
 
-  implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
+  implicit def sendMessageEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
     jsonEncoderOf[F, SendMessage]
 }
 
+// TODO parser
 /**
   * [[https://core.telegram.org/bots#global-commands BotCommand]]
   */
