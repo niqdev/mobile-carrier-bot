@@ -2,9 +2,7 @@ package com.github.niqdev
 package http
 
 import cats.effect.{ IO, Sync }
-import com.github.niqdev.model
-import com.github.niqdev.model.telegram.{ BotCommand, Message, ResponseParameters, SendMessage, Update, User }
-import com.github.niqdev.model.{ telegram, _ }
+import com.github.niqdev.model._
 import com.github.niqdev.repository.TelegramRepository
 import fs2.Stream
 import org.http4s.client.Client

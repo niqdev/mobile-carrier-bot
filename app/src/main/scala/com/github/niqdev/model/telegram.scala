@@ -12,7 +12,7 @@ import org.http4s.{ EntityDecoder, EntityEncoder }
 
 // https://circe.github.io/circe/codecs/custom-codecs.html#custom-key-mappings-via-annotations
 // https://github.com/circe/circe/blob/master/modules/generic-extras/src/test/scala/io/circe/generic/extras/ConfiguredJsonCodecWithKeySuite.scala
-private[model] sealed trait CirceSnakeCaseConfiguration extends AutoDerivation {
+private[model] sealed trait CirceSnakeCaseConfiguration {
 
   implicit val snakeCase: Configuration =
     Configuration.default.withSnakeCaseMemberNames
@@ -41,7 +41,7 @@ final case class User(
   languageCode: Option[String] = None
 )
 
-object User extends CirceSnakeCaseConfiguration
+object User extends CirceSnakeCaseConfiguration with AutoDerivation
 
 // TODO refined + date (Instant or ZonedDateTime)
 /**
@@ -115,7 +115,7 @@ final case class ResponseParameters(
   retryAfter: Long
 )
 
-object ResponseParameters extends CirceSnakeCaseConfiguration
+object ResponseParameters extends CirceSnakeCaseConfiguration with AutoDerivation
 
 /**
   * [[https://core.telegram.org/bots/api#making-requests Response]]
@@ -179,18 +179,39 @@ object Format extends Enum[Format] with FormatInstances {
 @ConfiguredJsonCodec
 final case class SendMessage(
   chatId: String,
+  text: String
+)
+
+// TODO
+/*
+@ConfiguredJsonCodec
+final case class SendMessage(
+  chatId: String,
   text: String,
   parseMode: Option[Format] = None,
   replyToMessageId: Option[Long] = None,
   // TODO enumeratum: InlineKeyboardMarkup or ReplyKeyboardMarkup or ReplyKeyboardRemove or ForceReply
   replyMarkup: Option[String] = None
 )
+*/
 
 object SendMessage extends CirceSnakeCaseConfiguration {
 
   // chat_id: Integer or String
   def apply(chatId: Long, text: String): SendMessage =
     SendMessage(s"$chatId", text)
+
+  // FIXME null values for optional fields are rejected
+  // https://stackoverflow.com/a/42370819
+  /*
+  implicit def sendMessageEncoder: ObjectEncoder[SendMessage] =
+    deriveEncoder[SendMessage].mapJsonObject(_.filter {
+      case ("parse_mode", value) => !value.isNull
+      case ("reply_to_message_id", value) => !value.isNull
+      case ("reply_markup", value) => !value.isNull
+      case _ => true
+    })
+   */
 
   implicit def sendMessageEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
     jsonEncoderOf[F, SendMessage]
