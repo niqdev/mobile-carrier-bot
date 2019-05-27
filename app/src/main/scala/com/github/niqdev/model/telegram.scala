@@ -4,7 +4,7 @@ package model
 import cats.Applicative
 import cats.effect.Sync
 import enumeratum.{ Enum, EnumEntry }
-import io.circe.generic.extras.{ AutoDerivation, Configuration, ConfiguredJsonCodec }
+import io.circe.generic.extras.{ Configuration, ConfiguredJsonCodec }
 import io.circe.generic.semiauto.{ deriveDecoder, deriveEncoder }
 import io.circe.{ Decoder, Encoder, HCursor, Json }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
@@ -41,7 +41,7 @@ final case class User(
   languageCode: Option[String] = None
 )
 
-object User extends CirceSnakeCaseConfiguration with AutoDerivation
+object User extends CirceSnakeCaseConfiguration
 
 // TODO refined + date (Instant or ZonedDateTime)
 /**
@@ -115,7 +115,7 @@ final case class ResponseParameters(
   retryAfter: Long
 )
 
-object ResponseParameters extends CirceSnakeCaseConfiguration with AutoDerivation
+object ResponseParameters extends CirceSnakeCaseConfiguration
 
 /**
   * [[https://core.telegram.org/bots/api#making-requests Response]]
@@ -193,7 +193,7 @@ final case class SendMessage(
   // TODO enumeratum: InlineKeyboardMarkup or ReplyKeyboardMarkup or ReplyKeyboardRemove or ForceReply
   replyMarkup: Option[String] = None
 )
-*/
+ */
 
 object SendMessage extends CirceSnakeCaseConfiguration {
 
@@ -202,6 +202,7 @@ object SendMessage extends CirceSnakeCaseConfiguration {
     SendMessage(s"$chatId", text)
 
   // FIXME null values for optional fields are rejected
+  // ConfiguredJsonCodec adds semiauto derivation which conflicts with the custom encoder
   // https://stackoverflow.com/a/42370819
   /*
   implicit def sendMessageEncoder: ObjectEncoder[SendMessage] =
