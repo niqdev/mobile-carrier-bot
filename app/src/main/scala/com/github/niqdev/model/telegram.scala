@@ -150,14 +150,37 @@ object Response {
 }
 
 /**
+  * [[https://core.telegram.org/bots/api#formatting-options]]
+  */
+sealed abstract class Format(override val entryName: String) extends EnumEntry
+
+sealed trait FormatInstances {
+
+  implicit val formatEncoder: Encoder[Format] =
+    Encoder.encodeString.contramap[Format](_.entryName)
+
+  implicit val formatDecoder: Decoder[Format] = Decoder.decodeString.emap { value =>
+    Format.withNameOption(value).toRight(s"$value is invalid")
+  }
+}
+
+object Format extends Enum[Format] with FormatInstances {
+
+  // macro
+  val values = findValues
+
+  case object Markdown extends Format("Markdown")
+  case object Html     extends Format("HTML")
+}
+
+/**
   * [[https://core.telegram.org/bots/api#sendmessage SendMessage]]
   */
 @ConfiguredJsonCodec
 final case class SendMessage(
   chatId: String,
   text: String,
-  // TODO enumeratum: Markdown or HTML
-  parseMode: Option[String] = None,
+  parseMode: Option[Format] = None,
   replyToMessageId: Option[Long] = None,
   // TODO enumeratum: InlineKeyboardMarkup or ReplyKeyboardMarkup or ReplyKeyboardRemove or ForceReply
   replyMarkup: Option[String] = None
