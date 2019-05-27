@@ -15,6 +15,7 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 
 *TODO (not in order):*
 
+- [ ] CQRS and Event Source
 - [x] skeleton, plugins, setup
 - [ ] architecture docs and diagrams
 - [x] healtcheck status/info/env
@@ -39,7 +40,7 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [ ] travis automate publish to dockerhub
 - [x] publish to dockerhub
 - [x] create deployment k8s chart
-- [ ] create argocd app
+- [x] create argocd app
 - [ ] statefulset with PostgreSQL
 - [ ] alerting with prometheus to slack
 - [ ] grafana dashboard
@@ -48,6 +49,7 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 - [x] fix manual Circe codecs with withSnakeCaseMemberNames config
 - [ ] add gatling stress tests
 - [ ] add integration tests
+- [ ] manage secrets in k8s
 
 ---
 
