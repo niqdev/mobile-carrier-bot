@@ -6,15 +6,15 @@ import java.time.ZonedDateTime
 final case class Event(
   eventId: Long,
   eventGroup: EventGroup,
+  eventType: String,
   timestamp: ZonedDateTime,
   userId: Long,
   data: String
 )
 
-// TODO ADT or enumeratum
 sealed trait EventGroup
-case object UserGroupEvent
-case object ConversationGroupEvent
+case object UserGroupEvent extends EventGroup
+case object ConversationGroupEvent extends EventGroup
 
 sealed trait UserEvent
 // TODO pure UUID
