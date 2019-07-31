@@ -15,7 +15,6 @@ A bot to access mobile carrier services implemented on top of the Typelevel stac
 
 *TODO (not in order):*
 
-- [ ] CQRS and Event Source
 - [x] skeleton, plugins, setup
 - [ ] architecture docs and diagrams
 - [x] healtcheck status/info/env
