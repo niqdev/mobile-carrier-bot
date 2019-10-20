@@ -5,7 +5,11 @@
 [travis-image]: https://travis-ci.org/niqdev/mobile-carrier-bot.svg?branch=master
 [travis-url]: https://travis-ci.org/niqdev/mobile-carrier-bot
 
-A bot to access mobile carrier services implemented on top of the Typelevel stack using Tagless Final style
+A bot to access mobile carrier services, currently supports
+
+* [x] Three Ireland
+* [x] TIM Italia
+* [ ] Iliad Italia
 
 ---
 

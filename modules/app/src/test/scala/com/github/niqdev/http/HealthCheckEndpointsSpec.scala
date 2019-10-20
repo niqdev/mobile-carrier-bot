@@ -45,7 +45,7 @@ final class HealthCheckEndpointsSpec extends BaseSpec {
           response.attemptAs[BuildInformation].value.unsafeRunSync() match {
             case Right(buildInformation) =>
               buildInformation.name shouldBe "mobile-carrier-bot"
-              buildInformation.scalaVersion shouldBe "2.12.8"
+              buildInformation.scalaVersion shouldBe "2.12.10"
 
               // e.g. 102-c40a3439+20190518-1559
               buildInformation.version.nonEmpty shouldBe true
