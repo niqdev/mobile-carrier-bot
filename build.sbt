@@ -7,27 +7,27 @@ lazy val info = new {
 
 lazy val versions = new {
   // shared
-  val catsCore   = "2.0.0-M4"
-  val catsEffect = "1.4.0"
-  val refined    = "0.9.9"
+  val catsCore   = "2.0.0"
+  val catsEffect = "2.0.0"
+  val refined    = "0.9.10"
   val enumeratum = "1.5.13"
-  val log4cats   = "0.3.0"
+  val log4cats   = "1.0.1"
   val logback    = "1.2.3"
   val silencer   = "1.4.2"
 
   // app
   val ciris  = "0.12.1"
-  val http4s = "0.20.7"
-  val circe  = "0.11.1"
+  val http4s = "0.20.11"
+  val circe  = "0.12.2"
   val fs2    = "1.0.5"
-  val doobie = "0.7.0"
+  val doobie = "0.7.1"
 
   // core
-  val scalaScraper = "2.1.0"
+  val scalaScraper = "2.2.0"
 
   // test
   val scalatest  = "3.0.8"
-  val scalacheck = "1.14.0"
+  val scalacheck = "1.14.2"
 }
 
 lazy val dependencies = new {
