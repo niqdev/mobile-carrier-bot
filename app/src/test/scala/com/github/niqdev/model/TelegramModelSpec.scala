@@ -1,7 +1,6 @@
 package com.github.niqdev
 package model
 
-import com.github.niqdev.model.telegram.{ Message, Response, Update, User }
 import io.circe.Json
 import io.circe.parser.parse
 

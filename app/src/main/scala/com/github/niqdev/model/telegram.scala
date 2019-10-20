@@ -1,11 +1,10 @@
 package com.github.niqdev
 package model
-package telegram
 
 import cats.Applicative
 import cats.effect.Sync
 import enumeratum.{ Enum, EnumEntry }
-import io.circe.generic.extras.{ AutoDerivation, Configuration, ConfiguredJsonCodec }
+import io.circe.generic.extras.{ Configuration, ConfiguredJsonCodec }
 import io.circe.generic.semiauto.{ deriveDecoder, deriveEncoder }
 import io.circe.{ Decoder, Encoder, HCursor, Json }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
@@ -13,7 +12,7 @@ import org.http4s.{ EntityDecoder, EntityEncoder }
 
 // https://circe.github.io/circe/codecs/custom-codecs.html#custom-key-mappings-via-annotations
 // https://github.com/circe/circe/blob/master/modules/generic-extras/src/test/scala/io/circe/generic/extras/ConfiguredJsonCodecWithKeySuite.scala
-private[model] sealed trait CirceSnakeCaseConfiguration extends AutoDerivation {
+private[model] sealed trait CirceSnakeCaseConfiguration {
 
   implicit val snakeCase: Configuration =
     Configuration.default.withSnakeCaseMemberNames
@@ -150,12 +149,51 @@ object Response {
     jsonOf[F, Response[Message]]
 }
 
-// TODO parse_mode, reply_markup
+/**
+  * [[https://core.telegram.org/bots/api#formatting-options]]
+  */
+sealed abstract class Format(override val entryName: String) extends EnumEntry
+
+sealed trait FormatInstances {
+
+  implicit val formatEncoder: Encoder[Format] =
+    Encoder.encodeString.contramap[Format](_.entryName)
+
+  implicit val formatDecoder: Decoder[Format] = Decoder.decodeString.emap { value =>
+    Format.withNameOption(value).toRight(s"$value is invalid")
+  }
+}
+
+object Format extends Enum[Format] with FormatInstances {
+
+  // macro
+  val values = findValues
+
+  case object Markdown extends Format("Markdown")
+  case object Html     extends Format("HTML")
+}
+
+/**
+  * [[https://core.telegram.org/bots/api#sendmessage SendMessage]]
+  */
 @ConfiguredJsonCodec
 final case class SendMessage(
   chatId: String,
   text: String
 )
+
+// TODO
+/*
+@ConfiguredJsonCodec
+final case class SendMessage(
+  chatId: String,
+  text: String,
+  parseMode: Option[Format] = None,
+  replyToMessageId: Option[Long] = None,
+  // TODO enumeratum: InlineKeyboardMarkup or ReplyKeyboardMarkup or ReplyKeyboardRemove or ForceReply
+  replyMarkup: Option[String] = None
+)
+ */
 
 object SendMessage extends CirceSnakeCaseConfiguration {
 
@@ -163,10 +201,24 @@ object SendMessage extends CirceSnakeCaseConfiguration {
   def apply(chatId: Long, text: String): SendMessage =
     SendMessage(s"$chatId", text)
 
-  implicit def settingsEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
+  // FIXME null values for optional fields are rejected
+  // ConfiguredJsonCodec adds semiauto derivation which conflicts with the custom encoder
+  // https://stackoverflow.com/a/42370819
+  /*
+  implicit def sendMessageEncoder: ObjectEncoder[SendMessage] =
+    deriveEncoder[SendMessage].mapJsonObject(_.filter {
+      case ("parse_mode", value) => !value.isNull
+      case ("reply_to_message_id", value) => !value.isNull
+      case ("reply_markup", value) => !value.isNull
+      case _ => true
+    })
+   */
+
+  implicit def sendMessageEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SendMessage] =
     jsonEncoderOf[F, SendMessage]
 }
 
+// TODO parser
 /**
   * [[https://core.telegram.org/bots#global-commands BotCommand]]
   */
