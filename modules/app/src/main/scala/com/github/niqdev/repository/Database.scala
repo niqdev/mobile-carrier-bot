@@ -34,8 +34,8 @@ object Database {
 /*
 
 lastpass-operator
-* telegram_api_key
-* encryption_keys
+ * telegram_api_key
+ * encryption_keys
 
 phones
 id|mobile_carrier|phone_number|username|password
@@ -46,4 +46,4 @@ telegram_id|phone_id
 slack_users
 slack_id|phone_id
 
-*/
+ */
