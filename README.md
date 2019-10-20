@@ -7,9 +7,9 @@
 
 A bot to access mobile carrier services, currently supports
 
-* [x] Three Ireland
-* [x] TIM Italia
-* [ ] Iliad Italia
+* [x] Three IE
+* [x] TIM
+* [ ] Iliad
 
 ---
 
