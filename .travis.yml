@@ -1,8 +1,13 @@
 sudo: false
 
 language: scala
+
+jdk:
+  - openjdk8
+  - openjdk11
+
 scala:
-  - 2.12.8
+  - 2.12.10
 
 cache:
   directories:
@@ -13,3 +18,12 @@ cache:
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION build
+
+# TODO
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: echo TODO
+    on:
+      tags: true
+      condition: $TRAVIS_TAG =~ ^v
