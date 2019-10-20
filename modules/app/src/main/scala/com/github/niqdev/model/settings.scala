@@ -117,6 +117,7 @@ object Settings extends SettingsInstances {
       )
     )
 
+  // FIXME use cats.data.Reader
   def loadF[F[_]: Sync]: F[Settings] =
     loadConfig(
       envF[F, LogLevel]("LOG_LEVEL")
